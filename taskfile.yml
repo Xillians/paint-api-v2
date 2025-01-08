@@ -1,0 +1,22 @@
+version: 'v3'
+
+tasks:
+  run:
+    desc: "Run the Go project"
+    cmds:
+      - "go run ./cmd/main/main.go"
+  
+  build:
+    desc: "Build the Go project"
+    cmds:
+      - "go build -o bin/main ./cmd/main/main.go"
+
+  test:
+    desc: "Run tests"
+    cmds:
+      - "go test ./..."
+
+  clean:
+    desc: "Clean the build artifacts"
+    cmds:
+      - "rm -rf bin"
