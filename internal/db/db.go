@@ -19,10 +19,11 @@ func New(cfg *config.DbConfig) (*gorm.DB, error) {
 		DSN:        url,
 	}), &gorm.Config{})
 
-	db.AutoMigrate(&PaintBrands{})
-
 	if err != nil {
 		return nil, err
 	}
+
+	db.AutoMigrate(&PaintBrands{})
+
 	return db, nil
 }
