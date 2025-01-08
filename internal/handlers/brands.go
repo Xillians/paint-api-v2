@@ -10,11 +10,14 @@ import (
 	"gorm.io/gorm"
 )
 
-type PaintBrandInput struct {
+type CreateBrandInputBody struct {
 	Name string `json:"name"`
 }
+type CreatebrandInput struct {
+	Body CreateBrandInputBody
+}
 
-type PaintBrandOutput struct {
+type CreateBrandOutput struct {
 	Body db.PaintBrands
 }
 
@@ -23,14 +26,20 @@ var CreatePaintBrandOperation = huma.Operation{
 	Path:   "/paint-brands",
 }
 
-func CreatePaintBrandHandler(ctx context.Context, input *PaintBrandInput) (*PaintBrandOutput, error) {
+func CreatePaintBrandHandler(ctx context.Context, input *CreatebrandInput) (*CreateBrandOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
-	brand := db.PaintBrands{Name: input.Name}
+	brand := db.PaintBrands{Name: input.Body.Name}
 	connection.Create(&brand)
-	return &PaintBrandOutput{Body: brand}, nil
+	return &CreateBrandOutput{Body: brand}, nil
+}
+
+type GetBrandInput struct {
+}
+type GetBrandOutput struct {
+	Body []db.PaintBrands
 }
 
 var GetPaintBrandsOperation = huma.Operation{
@@ -38,29 +47,26 @@ var GetPaintBrandsOperation = huma.Operation{
 	Path:   "/paint-brands",
 }
 
-func GetPaintBrandsHandler(ctx context.Context) ([]db.PaintBrands, error) {
+func GetPaintBrandsHandler(ctx context.Context, input *GetBrandInput) (*GetBrandOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
 	var brands []db.PaintBrands
 	connection.Find(&brands)
-	return brands, nil
+	return &GetBrandOutput{Body: brands}, nil
 }
 
-var GetPaintBrandOperation = huma.Operation{
-	Method: http.MethodGet,
-	Path:   "/paint-brands/{id}",
+type UpdateBrandInputBody struct {
+	Name string `json:"name"`
+}
+type UpdateBrandInput struct {
+	ID   uint `path:"id" example:"1" required:"true"`
+	Body UpdateBrandInputBody
 }
 
-func GetPaintBrandHandler(ctx context.Context, id string) (*PaintBrandOutput, error) {
-	connection, ok := ctx.Value("db").(*gorm.DB)
-	if !ok {
-		return nil, errors.New("could not retrieve db from context")
-	}
-	var brand db.PaintBrands
-	connection.First(&brand, id)
-	return &PaintBrandOutput{Body: brand}, nil
+type UpdateBrandOutput struct {
+	Body db.PaintBrands
 }
 
 var UpdatePaintBrandOperation = huma.Operation{
@@ -68,15 +74,26 @@ var UpdatePaintBrandOperation = huma.Operation{
 	Path:   "/paint-brands/{id}",
 }
 
-func UpdatePaintBrandHandler(ctx context.Context, id string, input *PaintBrandInput) (*PaintBrandOutput, error) {
+func UpdatePaintBrandHandler(ctx context.Context, input *UpdateBrandInput) (*UpdateBrandOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
 	var brand db.PaintBrands
-	connection.First(&brand, id)
-	connection.Model(&brand).Updates(db.PaintBrands{Name: input.Name})
-	return &PaintBrandOutput{Body: brand}, nil
+	if err := connection.First(&brand, input.ID).Error; err != nil {
+		return nil, err
+	}
+	brand.Name = input.Body.Name
+	connection.Save(&brand)
+	return &UpdateBrandOutput{Body: brand}, nil
+}
+
+type DeleteBrandInput struct {
+	ID uint `path:"id" example:"1" required:"true"`
+}
+
+type DeleteBrandOutput struct {
+	Body string
 }
 
 var DeletePaintBrandOperation = huma.Operation{
@@ -84,11 +101,13 @@ var DeletePaintBrandOperation = huma.Operation{
 	Path:   "/paint-brands/{id}",
 }
 
-func DeletePaintBrandHandler(ctx context.Context, id string) (struct{}, error) {
+func DeletePaintBrandHandler(ctx context.Context, input *DeleteBrandInput) (*DeleteBrandOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return struct{}{}, errors.New("could not retrieve db from context")
+		return nil, errors.New("could not retrieve db from context")
 	}
-	connection.Delete(&db.PaintBrands{}, id)
-	return struct{}{}, nil
+	if err := connection.Delete(&db.PaintBrands{}, input.ID).Error; err != nil {
+		return nil, err
+	}
+	return &DeleteBrandOutput{Body: "Brand deleted successfully"}, nil
 }

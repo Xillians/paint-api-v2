@@ -37,7 +37,7 @@ func main() {
 
 	api := humachi.New(mux, apiConfig)
 	api.UseMiddleware(middleware.UseDb(db))
-	routes.RegisterRoutes(api, db)
+	routes.RegisterRoutes(api)
 
 	slog.Info("Starting server", "port", c.HttpPort)
 	err = http.ListenAndServe(fmt.Sprintf(":%d", c.HttpPort), mux)
