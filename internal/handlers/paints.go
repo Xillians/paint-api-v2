@@ -28,6 +28,7 @@ type createPaintOutput struct {
 var CreatePaintOperation = huma.Operation{
 	Method: http.MethodPost,
 	Path:   "/paints",
+	Tags:   []string{"paints"},
 }
 
 func CreatePaintHandler(ctx context.Context, input *createPaintInput) (*createPaintOutput, error) {
@@ -55,6 +56,7 @@ type listPaintOutput struct {
 var ListPaintsOperation = huma.Operation{
 	Method: http.MethodGet,
 	Path:   "/paints",
+	Tags:   []string{"paints"},
 }
 
 func ListPaintsHandler(ctx context.Context, input *listPaintInput) (*listPaintOutput, error) {
@@ -78,6 +80,7 @@ type getPaintOutput struct {
 var GetPaintsOperation = huma.Operation{
 	Method: http.MethodGet,
 	Path:   "/paints/{id}",
+	Tags:   []string{"paints"},
 }
 
 func GetPaintHandler(ctx context.Context, input *getPaintsInput) (*getPaintOutput, error) {
@@ -110,6 +113,7 @@ type updatePaintOutput struct {
 var UpdatePaintOperation = huma.Operation{
 	Method: http.MethodPut,
 	Path:   "/paints/{id}",
+	Tags:   []string{"paints"},
 }
 
 func UpdatePaintHandler(ctx context.Context, input *updatePaintInput) (*updatePaintOutput, error) {

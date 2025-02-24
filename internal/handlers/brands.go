@@ -24,6 +24,7 @@ type createBrandOutput struct {
 var CreatePaintBrandOperation = huma.Operation{
 	Method: http.MethodPost,
 	Path:   "/paint-brands",
+	Tags:   []string{"paint-brands"},
 }
 
 func CreatePaintBrandHandler(ctx context.Context, input *createbrandInput) (*createBrandOutput, error) {
@@ -45,6 +46,7 @@ type listBrandOutput struct {
 var ListPaintBrandsOperation = huma.Operation{
 	Method: http.MethodGet,
 	Path:   "/paint-brands",
+	Tags:   []string{"paint-brands"},
 }
 
 func ListPaintBrandsHandler(ctx context.Context, input *listBrandInput) (*listBrandOutput, error) {
@@ -68,6 +70,7 @@ type getBrandOutput struct {
 var GetPaintBrandOperation = huma.Operation{
 	Method: http.MethodGet,
 	Path:   "/paint-brands/{id}",
+	Tags:   []string{"paint-brands"},
 }
 
 func GetPaintBrandHandler(ctx context.Context, input *getBrandInput) (*getBrandOutput, error) {
@@ -97,6 +100,7 @@ type updateBrandOutput struct {
 var UpdatePaintBrandOperation = huma.Operation{
 	Method: http.MethodPut,
 	Path:   "/paint-brands/{id}",
+	Tags:   []string{"paint-brands"},
 }
 
 func UpdatePaintBrandHandler(ctx context.Context, input *updateBrandInput) (*updateBrandOutput, error) {
@@ -124,6 +128,7 @@ type deleteBrandOutput struct {
 var DeletePaintBrandOperation = huma.Operation{
 	Method: http.MethodDelete,
 	Path:   "/paint-brands/{id}",
+	Tags:   []string{"paint-brands"},
 }
 
 func DeletePaintBrandHandler(ctx context.Context, input *deleteBrandInput) (*deleteBrandOutput, error) {
