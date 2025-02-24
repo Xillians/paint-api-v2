@@ -7,7 +7,6 @@ RUN go mod download && go mod verify
 COPY . .
 RUN go build -v -o /run-app .
 
-
 FROM debian:bookworm
 
 # Need to add ca-certificates or we will see the following error:
