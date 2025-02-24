@@ -141,6 +141,7 @@ type deletePaintOutput struct {
 var DeletePaintOperation = huma.Operation{
 	Method: http.MethodDelete,
 	Path:   "/paints/{id}",
+	Tags:   []string{"paints"},
 }
 
 func DeletePaintHandler(ctx context.Context, input *deletePaintInput) (*deletePaintOutput, error) {
