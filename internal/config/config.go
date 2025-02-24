@@ -4,43 +4,31 @@ import (
 	"log"
 	"log/slog"
 	"os"
-	"strconv"
 
-	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 )
 
 type DbConfig struct {
-	DatabseUrl string `json:"database_url"`
-	AuthToken  string `json:"auth_token"`
+	DatabseUrl string `envconfig:"DATABASE_URL" required:"true"`
+	AuthToken  string `envconfig:"AUTH_TOKEN" required:"true"`
 }
 
 type Config struct {
 	DbConfig    DbConfig
-	LogLevel    slog.Level `json:"log_level" default:"info"`
-	HttpPort    int        `json:"http_port" default:"8080"`
-	Environment string     `json:"environment" default:"development"`
+	LogLevel    slog.Level `envconfig:"LOG_LEVEL" default:"info"`
+	HttpPort    int        `envconfig:"HTTP_PORT" default:"8080"`
+	Environment string     `envconfig:"ENVIRONMENT" default:"development"`
 }
 
 func NewConfig() *Config {
-	err := godotenv.Load()
+	var c Config
+	err := envconfig.Process("", &c)
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Fatal(err)
 	}
-
-	port, err := strconv.Atoi(os.Getenv("HTTP_PORT"))
-	if err != nil {
-		log.Fatalf("Error parsing HTTP_PORT")
-	}
-
-	return &Config{
-		DbConfig: DbConfig{
-			DatabseUrl: os.Getenv("DATABASE_URL"),
-			AuthToken:  os.Getenv("AUTH_TOKEN"),
-		},
-		LogLevel:    parseLogLevel(os.Getenv("LOG_LEVEL")),
-		HttpPort:    port,
-		Environment: os.Getenv("ENVIRONMENT"),
-	}
+	c.LogLevel = parseLogLevel(os.Getenv("LOG_LEVEL"))
+	slog.Info("Config", "config", c)
+	return &c
 }
 
 func parseLogLevel(level string) slog.Level {

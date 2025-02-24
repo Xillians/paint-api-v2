@@ -13,4 +13,10 @@ func RegisterRoutes(api huma.API) {
 	huma.Register(api, handlers.GetPaintBrandOperation, handlers.GetPaintBrandHandler)
 	huma.Register(api, handlers.UpdatePaintBrandOperation, handlers.UpdatePaintBrandHandler)
 	huma.Register(api, handlers.DeletePaintBrandOperation, handlers.DeletePaintBrandHandler)
+
+	huma.Register(api, handlers.CreatePaintOperation, handlers.CreatePaintHandler)
+	huma.Register(api, handlers.ListPaintsOperation, handlers.ListPaintsHandler)
+	huma.Register(api, handlers.GetPaintsOperation, handlers.GetPaintHandler)
+	huma.Register(api, handlers.UpdatePaintOperation, handlers.UpdatePaintHandler)
+	huma.Register(api, handlers.DeletePaintOperation, handlers.DeletePaintHandler)
 }

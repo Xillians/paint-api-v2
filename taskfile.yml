@@ -4,7 +4,7 @@ tasks:
   run:
     desc: "Run the Go project"
     cmds:
-      - "go run ./cmd/main/main.go"
+      - "go run ./main.go"
   
   build:
     desc: "Build the Go project"
