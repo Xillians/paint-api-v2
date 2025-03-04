@@ -64,13 +64,17 @@ var ListPaintsOperation = huma.Operation{
 }
 
 func ListPaintsHandler(ctx context.Context, input *listPaintInput) (*listPaintOutput, error) {
+	out := listPaintOutput{
+		Body: listPaintOutputBody{
+			Paints: []db.Paints{},
+		},
+	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
-	var paints []db.Paints
-	connection.Find(&paints)
-	return &listPaintOutput{Body: listPaintOutputBody{Paints: paints}}, nil
+	connection.Find(&out.Body.Paints)
+	return &out, nil
 }
 
 type getPaintsInput struct {
