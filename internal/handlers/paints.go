@@ -49,8 +49,12 @@ func CreatePaintHandler(ctx context.Context, input *createPaintInput) (*createPa
 type listPaintInput struct {
 }
 
+type listPaintOutputBody struct {
+	Paints []db.Paints `json:"paints"`
+}
+
 type listPaintOutput struct {
-	Body []db.Paints
+	Body listPaintOutputBody
 }
 
 var ListPaintsOperation = huma.Operation{
@@ -66,7 +70,7 @@ func ListPaintsHandler(ctx context.Context, input *listPaintInput) (*listPaintOu
 	}
 	var paints []db.Paints
 	connection.Find(&paints)
-	return &listPaintOutput{Body: paints}, nil
+	return &listPaintOutput{Body: listPaintOutputBody{Paints: paints}}, nil
 }
 
 type getPaintsInput struct {
