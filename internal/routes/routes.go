@@ -20,8 +20,7 @@ func RegisterRoutes(api huma.API) {
 	huma.Register(api, handlers.UpdatePaintOperation, handlers.UpdatePaintHandler)
 	huma.Register(api, handlers.DeletePaintOperation, handlers.DeletePaintHandler)
 
-	huma.Register(api, handlers.CreateUserOperation, handlers.CreateUserHandler)
-	huma.Register(api, handlers.ListUsersOperation, handlers.ListUsersHandler)
-	huma.Register(api, handlers.GetUsersOperation, handlers.GetUserHandler)
-	huma.Register(api, handlers.DeleteUserOperation, handlers.DeleteUserHandler)
+	huma.Register(api, handlers.RegisterUserOperation, handlers.RegisterUserHandler)
+	huma.Register(api, handlers.LoginOperation, handlers.LoginHandler)
+	huma.Register(api, handlers.ForgetUserOperation, handlers.ForgetUserHandler)
 }

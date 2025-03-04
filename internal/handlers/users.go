@@ -11,110 +11,100 @@ import (
 	"gorm.io/gorm"
 )
 
-type createUserInputBody struct {
-	GoogleUserId string `json:"google_user_id" validate:"required"`
+type registerUserInputBody struct {
+	GoogleUserId string `json:"user_id" validate:"required"`
 }
-type createUserInput struct {
-	Body createUserInputBody
+type RegisterUserInput struct {
+	Body registerUserInputBody
 }
 
-type createUserOutput struct {
+type registerUserOutput struct {
 	Body db.Users
 }
 
-var CreateUserOperation = huma.Operation{
+var RegisterUserOperation = huma.Operation{
 	Method: http.MethodPost,
-	Path:   "/Users",
+	Path:   "/register",
 	Tags:   []string{"Users"},
 }
 
-func CreateUserHandler(ctx context.Context, input *createUserInput) (*createUserOutput, error) {
+func RegisterUserHandler(ctx context.Context, input *RegisterUserInput) (*registerUserOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
+
+	user := connection.First(&db.Users{}, "google_user_id = ?", input.Body.GoogleUserId)
+	if user.RowsAffected > 0 {
+		return nil, huma.NewError(http.StatusConflict, "User already exists")
+	}
+
 	User := db.Users{
 		GoogleUserId: input.Body.GoogleUserId,
 		CreatedAt:    time.Now().String(),
 		UpdatedAt:    time.Now().String(),
 	}
 	connection.Create(&User)
-	return &createUserOutput{Body: User}, nil
+
+	return &registerUserOutput{Body: User}, nil
 }
 
-type listUserInput struct {
+type LoginInput struct {
+	GoogleUserId int `path:"id"`
 }
 
-type listUserOutput struct {
-	Body []db.Users
-}
-
-var ListUsersOperation = huma.Operation{
-	Method: http.MethodGet,
-	Path:   "/Users",
-	Tags:   []string{"Users"},
-}
-
-func ListUsersHandler(ctx context.Context, input *listUserInput) (*listUserOutput, error) {
-	connection, ok := ctx.Value("db").(*gorm.DB)
-	if !ok {
-		return nil, errors.New("could not retrieve db from context")
-	}
-	var Users []db.Users
-	connection.Find(&Users)
-	return &listUserOutput{Body: Users}, nil
-}
-
-type getUsersInput struct {
-	Id int `path:"id"`
-}
-
-type getUserOutput struct {
+type LoginOutput struct {
 	Body db.Users
 }
 
-var GetUsersOperation = huma.Operation{
+var LoginOperation = huma.Operation{
 	Method: http.MethodGet,
-	Path:   "/Users/{id}",
+	Path:   "/login/{id}",
 	Tags:   []string{"Users"},
 }
 
-func GetUserHandler(ctx context.Context, input *getUsersInput) (*getUserOutput, error) {
+func LoginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
 	var User db.Users
-	if err := connection.First(&User, input.Id).Error; err != nil {
+	if err := connection.First(&User, "google_user_id = ?", input.GoogleUserId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, huma.NewError(http.StatusNotFound, "User not found")
 		}
 		return nil, err
 	}
-	return &getUserOutput{Body: User}, nil
+	return &LoginOutput{Body: User}, nil
 }
 
-type deleteUserInput struct {
+type forgetUserInput struct {
 	Id int `path:"id"`
 }
 
-type deleteUserOutput struct {
+type forgetUserOutput struct {
 	Body string
 }
 
-var DeleteUserOperation = huma.Operation{
+var ForgetUserOperation = huma.Operation{
 	Method: http.MethodDelete,
-	Path:   "/Users/{id}",
+	Path:   "/forget/{id}",
 	Tags:   []string{"Users"},
 }
 
-func DeleteUserHandler(ctx context.Context, input *deleteUserInput) (*deleteUserOutput, error) {
+func ForgetUserHandler(ctx context.Context, input *forgetUserInput) (*forgetUserOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
-	if err := connection.Delete(&db.Users{}, input.Id).Error; err != nil {
+
+	user := connection.First(&db.Users{}, "google_user_id = ?", input.Id)
+	if user.RowsAffected == 0 {
+		return nil, huma.NewError(http.StatusNotFound, "User not found")
+	}
+
+	if err := connection.Delete(&db.Users{}, "google_user_id = ?", input.Id).Error; err != nil {
 		return nil, err
 	}
-	return &deleteUserOutput{Body: "User deleted successfully"}, nil
+	return &forgetUserOutput{Body: "User deleted successfully"}, nil
 }
