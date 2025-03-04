@@ -22,5 +22,6 @@ func RegisterRoutes(api huma.API) {
 
 	huma.Register(api, handlers.RegisterUserOperation, handlers.RegisterUserHandler)
 	huma.Register(api, handlers.LoginOperation, handlers.LoginHandler)
+	huma.Register(api, handlers.RefreshTokenOperation, handlers.RefreshTokenHandler)
 	huma.Register(api, handlers.ForgetUserOperation, handlers.ForgetUserHandler)
 }

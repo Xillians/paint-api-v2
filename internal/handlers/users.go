@@ -85,13 +85,7 @@ func LoginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) 
 		}
 		return nil, err
 	}
-	// Since we have found the user, we want to create a new session for the user
-	// This session should be a JWT that will be used to authenticate the user
-	// All other requests will require this JWT to be passed in the header
-	// The JWT will be generated using the user's google user id
-	// The JWT will be signed using a secret key that will be stored
-	// in the environment variables
-	// The JWT will have an expiry time of 1 hour
+
 	token, err := jwt.GenerateToken(User.GoogleUserId)
 	if err != nil {
 		return nil, err
@@ -118,11 +112,28 @@ var RefreshTokenOperation = huma.Operation{
 }
 
 func RefreshTokenHandler(ctx context.Context, input *refreshTokenInput) (*refreshTokenOutput, error) {
-	// We will use the google user id to generate a new JWT
-	// This JWT will have an expiry time of 1 hour
-	// The JWT will be signed using a secret key that will be stored
-	// in the environment variables
-	return nil, nil
+	connection, ok := ctx.Value("db").(*gorm.DB)
+	if !ok {
+		return nil, errors.New("could not retrieve db from context")
+	}
+	jwt, ok := ctx.Value("jwtKey").(jwt.JWTService)
+	if !ok {
+		return nil, errors.New("could not retrieve jwt from context")
+	}
+
+	var User db.Users
+	if err := connection.First(&User, "google_user_id = ?", input.Id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, huma.NewError(http.StatusNotFound, "User not found")
+		}
+		return nil, err
+	}
+
+	token, err := jwt.GenerateToken(User.GoogleUserId)
+	if err != nil {
+		return nil, err
+	}
+	return &refreshTokenOutput{Body: refreshTokenOutputBody{Token: token}}, nil
 }
 
 type forgetUserInput struct {
