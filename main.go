@@ -18,6 +18,15 @@ import (
 
 func main() {
 	apiConfig := huma.DefaultConfig("Paint API", "0.1.0")
+	apiConfig.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
+		"bearer": {
+			Type:   "http",
+			Scheme: "bearer",
+		},
+	}
+	apiConfig.Security = []map[string][]string{
+		{"bearer": {}},
+	}
 	c := config.NewConfig()
 
 	logLevel := c.GetLogLevel()
@@ -41,6 +50,7 @@ func main() {
 
 	jwtService := jwt.NewJWTService(c.JwtSecret)
 	api.UseMiddleware(middleware.UseJwt(*jwtService))
+	api.UseMiddleware(middleware.AuthenticateRequests(api, *jwtService))
 
 	routes.RegisterRoutes(api)
 
