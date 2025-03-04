@@ -16,6 +16,7 @@ type DbConfig struct {
 type Config struct {
 	DbConfig    DbConfig
 	LogLevel    slog.Level `envconfig:"LOG_LEVEL" default:"info"`
+	JwtSecret   string     `envconfig:"JWT_SECRET" required:"true"`
 	HttpPort    int        `envconfig:"HTTP_PORT" default:"8080"`
 	Environment string     `envconfig:"ENVIRONMENT" default:"development"`
 }

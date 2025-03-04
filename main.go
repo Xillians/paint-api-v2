@@ -7,6 +7,7 @@ import (
 	"os"
 	"paint-api/internal/config"
 	"paint-api/internal/db"
+	"paint-api/internal/jwt"
 	"paint-api/internal/middleware"
 	"paint-api/internal/routes"
 
@@ -37,6 +38,10 @@ func main() {
 
 	api := humachi.New(mux, apiConfig)
 	api.UseMiddleware(middleware.UseDb(db))
+
+	jwtService := jwt.NewJWTService(c.JwtSecret)
+	api.UseMiddleware(middleware.UseJwt(*jwtService))
+
 	routes.RegisterRoutes(api)
 
 	slog.Info("Starting server", "port", c.HttpPort)
