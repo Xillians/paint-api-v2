@@ -55,7 +55,8 @@ type LoginInput struct {
 }
 
 type LoginOutputBody struct {
-	Token string `json:"token"`
+	Token     string `json:"token"`
+	ExpiresAt string `json:"expires_at"`
 }
 
 type LoginOutput struct {
@@ -90,7 +91,12 @@ func LoginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) 
 	if err != nil {
 		return nil, err
 	}
-	return &LoginOutput{Body: LoginOutputBody{Token: token}}, nil
+	return &LoginOutput{
+		Body: LoginOutputBody{
+			Token:     token,
+			ExpiresAt: time.Now().Add(time.Hour * 7).String(),
+		},
+	}, nil
 }
 
 type refreshTokenInput struct {
@@ -98,7 +104,8 @@ type refreshTokenInput struct {
 }
 
 type refreshTokenOutputBody struct {
-	Token string `json:"token"`
+	Token     string `json:"token"`
+	ExpiresAt string `json:"expires_at"`
 }
 
 type refreshTokenOutput struct {
@@ -133,7 +140,12 @@ func RefreshTokenHandler(ctx context.Context, input *refreshTokenInput) (*refres
 	if err != nil {
 		return nil, err
 	}
-	return &refreshTokenOutput{Body: refreshTokenOutputBody{Token: token}}, nil
+	return &refreshTokenOutput{
+		Body: refreshTokenOutputBody{
+			Token:     token,
+			ExpiresAt: time.Now().Add(time.Hour * 7).String(),
+		},
+	}, nil
 }
 
 type forgetUserInput struct {
