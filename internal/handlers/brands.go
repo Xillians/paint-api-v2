@@ -40,12 +40,8 @@ func CreatePaintBrandHandler(ctx context.Context, input *createbrandInput) (*cre
 type listBrandInput struct {
 }
 
-type listBrandOutputBody struct {
-	Brands []db.PaintBrands `json:"brands"`
-}
-
 type listBrandOutput struct {
-	Body listBrandOutputBody
+	Body []db.PaintBrands `json:"brands"`
 }
 
 var ListPaintBrandsOperation = huma.Operation{
@@ -56,15 +52,13 @@ var ListPaintBrandsOperation = huma.Operation{
 
 func ListPaintBrandsHandler(ctx context.Context, input *listBrandInput) (*listBrandOutput, error) {
 	out := listBrandOutput{
-		Body: listBrandOutputBody{
-			Brands: []db.PaintBrands{},
-		},
+		Body: []db.PaintBrands{},
 	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
-	connection.Find(&out.Body.Brands)
+	connection.Find(&out.Body)
 	return &out, nil
 }
 
