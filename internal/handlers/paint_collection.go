@@ -68,8 +68,17 @@ func AddToCollectionHandler(ctx context.Context, input *addToCollectoinInput) (*
 type listPaintCollectionInput struct {
 }
 
+type collectionPaintDetails struct {
+	CollectionId        int       `json:"id" gorm:"primaryKey"`
+	Quantity            int       `json:"quantity"`
+	PaintID             int       `json:"-" gorm:"not null"`
+	Paint               db.Paints `json:"paint" gorm:"foreignKey:PaintID;references:ID"`
+	CollectionCreatedAt time.Time `json:"created_at"`
+	CollectionUpdatedAt time.Time `json:"updated_at"`
+}
+
 type listPaintCollectionOutputBody struct {
-	Collection []db.PaintCollection `json:"collection"`
+	Collection []collectionPaintDetails `json:"collection"`
 }
 
 type listPaintCollectionOutput struct {
@@ -85,7 +94,7 @@ var ListPaintCollectionOperation = huma.Operation{
 func ListPaintCollectionHandler(ctx context.Context, input *listPaintCollectionInput) (*listPaintCollectionOutput, error) {
 	out := listPaintCollectionOutput{
 		Body: listPaintCollectionOutputBody{
-			Collection: []db.PaintCollection{},
+			Collection: []collectionPaintDetails{},
 		},
 	}
 	userId, ok := ctx.Value("userId").(string)
@@ -97,11 +106,12 @@ func ListPaintCollectionHandler(ctx context.Context, input *listPaintCollectionI
 		return nil, errors.New("could not retrieve db from context")
 	}
 
-	err := connection.Table("paint_collections").
-		Select("paint_collections.*").
+	err := connection.Preload("Paint").
+		Table("paint_collections").
+		Select("paint_collections.id AS collection_id, paint_collections.quantity, paint_collections.paint_id, paint_collections.created_at as collection_created_at, paint_collections.updated_at as collection_updated_at").
 		Joins("JOIN users ON users.id = paint_collections.user_id").
 		Where("users.google_user_id = ?", userId).
-		Scan(&out.Body.Collection).Error
+		Find(&out.Body.Collection).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, huma.NewError(http.StatusNotFound, "user not found")
