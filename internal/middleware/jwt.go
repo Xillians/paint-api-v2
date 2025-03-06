@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log/slog"
 	"paint-api/internal/jwt"
 	"regexp"
 	"strings"
@@ -41,7 +40,6 @@ func AuthenticateRequests(api huma.API, jwtService jwt.JWTService) func(huma.Con
 			huma.WriteErr(api, ctx, 401, "Unauthorized: User ID not found in token", nil)
 			return
 		}
-		slog.Info("User ID", "userId", userId)
 		ctx = huma.WithValue(ctx, "userId", userId)
 
 		next(ctx)
