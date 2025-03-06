@@ -49,6 +49,7 @@ func AddToCollectionHandler(ctx context.Context, input *addToCollectoinInput) (*
 		slog.Error("An error occurred when fetching user.", "error", err)
 		return nil, huma.NewError(http.StatusInternalServerError, "could not add paint to collection")
 	}
+
 	collectionEntry := db.PaintCollection{
 		UserId:    user.ID,
 		PaintId:   input.Body.PaintId,
@@ -56,7 +57,7 @@ func AddToCollectionHandler(ctx context.Context, input *addToCollectoinInput) (*
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	slog.Debug("Creating entry", "entry", collectionEntry)
+
 	if err := connection.Create(&collectionEntry).Error; err != nil {
 		slog.Error("An error occurred when creating entry.", "error", err)
 		return nil, huma.NewError(http.StatusInternalServerError, "could not add paint to collection")
@@ -87,11 +88,28 @@ func ListPaintCollectionHandler(ctx context.Context, input *listPaintCollectionI
 			Collection: []db.PaintCollection{},
 		},
 	}
+	userId, ok := ctx.Value("userId").(string)
+	if !ok {
+		return nil, errors.New("could not retrieve user_id from context")
+	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
-	connection.Find(&out.Body.Collection)
+
+	err := connection.Table("paint_collections").
+		Select("paint_collections.*").
+		Joins("JOIN users ON users.id = paint_collections.user_id").
+		Where("users.google_user_id = ?", userId).
+		Scan(&out.Body.Collection).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, huma.NewError(http.StatusNotFound, "user not found")
+		}
+		slog.Error("An error occurred when fetching collection.", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch collection")
+	}
+
 	return &out, nil
 }
 
@@ -124,12 +142,20 @@ func GetCollectionEntryHandler(ctx context.Context, input *getCollectionEntryInp
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
-	if err := connection.First(&out.Body.Paint, input.Id).Error; err != nil {
+
+	err := verifyCollectionOwnership(ctx, connection, input.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = connection.First(&out.Body.Paint, input.Id).Error
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, huma.NewError(http.StatusNotFound, "entry not found")
 		}
 		return nil, err
 	}
+
 	return &out, nil
 }
 
@@ -166,12 +192,21 @@ func UpdateCollectionEntryHandler(ctx context.Context, input *updateCollectionEn
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
-	if err := connection.First(&out.Body.Entry, input.Id).Error; err != nil {
+
+	err := verifyCollectionOwnership(ctx, connection, input.Id)
+	if err != nil {
 		return nil, err
 	}
+
+	err = connection.First(&out.Body.Entry, input.Id).Error
+	if err != nil {
+		return nil, err
+	}
+
 	out.Body.Entry.Quantity = input.Body.Quantity
 	out.Body.Entry.UpdatedAt = time.Now()
 	connection.Save(&out.Body.Entry)
+
 	return &out, nil
 }
 
@@ -189,13 +224,45 @@ var DeleteCollectionEntryOperation = huma.Operation{
 	Tags:   []string{"collection"},
 }
 
+// DeleteCollectionEntryHandler deletes a paint from the collection
+//
+// Deletes a paint from the collection. Requires authentication, and the paint must belong to the user.
 func DeleteCollectionEntryHandler(ctx context.Context, input *deleteCollectionEntryInput) (*deleteCollectionEntryOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
-	if err := connection.Delete(&db.PaintCollection{}, input.Id).Error; err != nil {
+
+	err := verifyCollectionOwnership(ctx, connection, input.Id)
+	if err != nil {
 		return nil, err
 	}
+
+	err = connection.Delete(&db.PaintCollection{}, input.Id).Error
+	if err != nil {
+		return nil, err
+	}
+
 	return &deleteCollectionEntryOutput{Body: "Paint deleted successfully"}, nil
+}
+
+// verifyCollectionOwnership checks if the user owns the entry in the collection
+//
+// returns an error if the user does not own the entry.
+func verifyCollectionOwnership(ctx context.Context, connection *gorm.DB, collectionId int) error {
+	userId, ok := ctx.Value("userId").(string)
+	if !ok {
+		return errors.New("could not retrieve user_id from context")
+	}
+
+	entry := db.PaintCollection{}
+	if err := connection.Joins("JOIN users ON users.id = paint_collections.user_id").
+		Where("paint_collections.id = ? AND users.google_user_id = ?", collectionId, userId).
+		First(&entry).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return huma.NewError(http.StatusNotFound, "entry not found")
+		}
+		return err
+	}
+	return nil
 }
