@@ -13,6 +13,19 @@ import (
 	"gorm.io/gorm"
 )
 
+type collectionPaintDetails struct {
+	ID        int                `json:"id" gorm:"primaryKey"`
+	Quantity  int                `json:"quantity"`
+	PaintID   int                `json:"-" gorm:"not null"`
+	Paint     paintOutputDetails `json:"paint" gorm:"foreignKey:PaintID"`
+	CreatedAt time.Time          `json:"created_at"`
+	UpdatedAt time.Time          `json:"updated_at"`
+}
+
+func (c collectionPaintDetails) TableName() string {
+	return "paint_collections"
+}
+
 type addToCollectionInputBody struct {
 	PaintId  int `json:"paint_id" validate:"required"`
 	Quantity int `json:"quantity" validate:"required"`
@@ -33,10 +46,10 @@ var AddToCollectionOperation = huma.Operation{
 func AddToCollectionHandler(ctx context.Context, input *addToCollectionInput) (*addToCollectionOutput, error) {
 	out := addToCollectionOutput{
 		Body: collectionPaintDetails{
-			CollectionCreatedAt: time.Now(),
-			CollectionUpdatedAt: time.Now(),
-			Quantity:            input.Body.Quantity,
-			PaintID:             input.Body.PaintId,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Quantity:  input.Body.Quantity,
+			PaintID:   input.Body.PaintId,
 		},
 	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
@@ -62,8 +75,8 @@ func AddToCollectionHandler(ctx context.Context, input *addToCollectionInput) (*
 		UserId:    user.ID,
 		PaintId:   out.Body.PaintID,
 		Quantity:  out.Body.Quantity,
-		CreatedAt: out.Body.CollectionCreatedAt,
-		UpdatedAt: out.Body.CollectionUpdatedAt,
+		CreatedAt: out.Body.CreatedAt,
+		UpdatedAt: out.Body.UpdatedAt,
 	}
 
 	err = connection.Create(&collectionEntry).Error
@@ -73,11 +86,7 @@ func AddToCollectionHandler(ctx context.Context, input *addToCollectionInput) (*
 	}
 	slog.Info("Paint added to collection", "Id", collectionEntry.ID, "PaintId", collectionEntry.PaintId, "Quantity", collectionEntry.Quantity)
 
-	err = connection.Preload("Paint").
-		Table("paint_collections").
-		Select("paint_collections.id AS collection_id, paint_collections.quantity, paint_collections.paint_id, paint_collections.created_at as collection_created_at, paint_collections.updated_at as collection_updated_at").
-		Where("paint_collections.id = ?", collectionEntry.ID).
-		Find(&out.Body).Error
+	err = connection.Preload("Paint").Preload("Paint.Brand").First(&out.Body, collectionEntry.ID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, huma.NewError(http.StatusNotFound, "user not found")
@@ -90,15 +99,6 @@ func AddToCollectionHandler(ctx context.Context, input *addToCollectionInput) (*
 }
 
 type listPaintCollectionInput struct {
-}
-
-type collectionPaintDetails struct {
-	CollectionId        int       `json:"id" gorm:"primaryKey"`
-	Quantity            int       `json:"quantity"`
-	PaintID             int       `json:"-" gorm:"not null"`
-	Paint               db.Paints `json:"paint" gorm:"foreignKey:PaintID;references:ID"`
-	CollectionCreatedAt time.Time `json:"created_at"`
-	CollectionUpdatedAt time.Time `json:"updated_at"`
 }
 
 type listPaintCollectionOutputBody struct {
@@ -130,9 +130,9 @@ func ListPaintCollectionHandler(ctx context.Context, input *listPaintCollectionI
 		return nil, errors.New("could not retrieve db from context")
 	}
 
-	err := connection.Preload("Paint").
-		Table("paint_collections").
-		Select("paint_collections.id AS collection_id, paint_collections.quantity, paint_collections.paint_id, paint_collections.created_at as collection_created_at, paint_collections.updated_at as collection_updated_at").
+	err := connection.
+		Preload("Paint").
+		Preload("Paint.Brand").
 		Joins("JOIN users ON users.id = paint_collections.user_id").
 		Where("users.google_user_id = ?", userId).
 		Find(&out.Body.Collection).Error
@@ -195,10 +195,8 @@ func UpdateCollectionEntryHandler(ctx context.Context, input *updateCollectionEn
 	connection.Save(&entry)
 
 	err = connection.Preload("Paint").
-		Table("paint_collections").
-		Select("paint_collections.id AS collection_id, paint_collections.quantity, paint_collections.paint_id, paint_collections.created_at as collection_created_at, paint_collections.updated_at as collection_updated_at").
-		Where("paint_collections.id = ?", entry.ID).
-		Find(&out.Body).Error
+		Preload("Paint.Brand").
+		First(&out.Body, entry.ID).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, huma.NewError(http.StatusNotFound, "user not found")
