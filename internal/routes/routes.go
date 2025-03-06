@@ -28,6 +28,5 @@ func RegisterRoutes(api huma.API) {
 	huma.Register(api, handlers.AddToCollectionOperation, handlers.AddToCollectionHandler)
 	huma.Register(api, handlers.DeleteCollectionEntryOperation, handlers.DeleteCollectionEntryHandler)
 	huma.Register(api, handlers.ListPaintCollectionOperation, handlers.ListPaintCollectionHandler)
-	huma.Register(api, handlers.GetCollectionEntryOperation, handlers.GetCollectionEntryHandler)
 	huma.Register(api, handlers.UpdateCollectionEntryOperation, handlers.UpdateCollectionEntryHandler)
 }
