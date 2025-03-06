@@ -17,9 +17,9 @@ type collectionPaintDetails struct {
 	ID        int                `json:"id" gorm:"primaryKey"`
 	Quantity  int                `json:"quantity"`
 	PaintID   int                `json:"-" gorm:"not null"`
-	Paint     paintOutputDetails `json:"paint" gorm:"foreignKey:PaintID"`
 	CreatedAt time.Time          `json:"created_at"`
 	UpdatedAt time.Time          `json:"updated_at"`
+	Paint     paintOutputDetails `json:"paint" gorm:"foreignKey:PaintID"`
 }
 
 func (c collectionPaintDetails) TableName() string {
