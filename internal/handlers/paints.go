@@ -3,13 +3,26 @@ package handlers
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
+	"time"
 
 	"paint-api/internal/db"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 )
+
+type PaintOutputDetails struct {
+	PaintId        int            `json:"id" gorm:"primaryKey"`
+	PaintName      string         `json:"name"`
+	BrandId        int            `json:"-" gorm:"not null"`
+	ColorCode      string         `json:"color_code"`
+	Description    string         `json:"description"`
+	PaintCreatedAt time.Time      `json:"created_at"`
+	PaintUpdatedAt time.Time      `json:"updated_at"`
+	Brand          db.PaintBrands `json:"brand" gorm:"foreignKey:BrandId"`
+}
 
 type createPaintInputBody struct {
 	Name        string `json:"name" validate:"required"`
@@ -22,7 +35,7 @@ type createPaintInput struct {
 }
 
 type createPaintOutput struct {
-	Body db.Paints
+	Body PaintOutputDetails
 }
 
 var CreatePaintOperation = huma.Operation{
@@ -32,25 +45,53 @@ var CreatePaintOperation = huma.Operation{
 }
 
 func CreatePaintHandler(ctx context.Context, input *createPaintInput) (*createPaintOutput, error) {
+	out := createPaintOutput{
+		Body: PaintOutputDetails{
+			PaintName:      input.Body.Name,
+			ColorCode:      input.Body.ColorCode,
+			Description:    input.Body.Description,
+			BrandId:        input.Body.BrandId,
+			PaintCreatedAt: time.Now(),
+			PaintUpdatedAt: time.Now(),
+		},
+	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
 	paint := db.Paints{
-		Name:        input.Body.Name,
-		BrandId:     input.Body.BrandId,
-		ColorCode:   input.Body.ColorCode,
-		Description: input.Body.Description,
+		Name:        out.Body.PaintName,
+		BrandId:     out.Body.BrandId,
+		ColorCode:   out.Body.ColorCode,
+		Description: out.Body.Description,
 	}
 	connection.Create(&paint)
-	return &createPaintOutput{Body: paint}, nil
+
+	err := connection.Preload("Brand").
+		Table("paints").
+		Select(`
+			paints.id AS paint_id, 
+			paints.name as paint_name, 
+			paints.created_at as paint_created_at, 
+			paints.updated_at as paint_updated_at
+		`).
+		Where("paints.id = ?", paint.ID).
+		Find(&out.Body).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, huma.NewError(http.StatusNotFound, "paint not found")
+		}
+		slog.Error("An error occurred when fetching paint.", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch paint")
+	}
+	return &out, nil
 }
 
 type listPaintInput struct {
 }
 
 type listPaintOutputBody struct {
-	Paints []db.Paints `json:"paints"`
+	Paints []PaintOutputDetails `json:"paints"`
 }
 
 type listPaintOutput struct {
@@ -66,14 +107,35 @@ var ListPaintsOperation = huma.Operation{
 func ListPaintsHandler(ctx context.Context, input *listPaintInput) (*listPaintOutput, error) {
 	out := listPaintOutput{
 		Body: listPaintOutputBody{
-			Paints: []db.Paints{},
+			Paints: []PaintOutputDetails{},
 		},
 	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
-	connection.Find(&out.Body.Paints)
+
+	err := connection.Preload("Brand").
+		Table("paints").
+		Select(`
+			paints.id AS paint_id,
+			paints.name as paint_name,
+			paints.created_at as paint_created_at,
+			paints.updated_at as paint_updated_at,
+			paints.description,
+			paints.color_code,
+			paints.brand_id
+		`).
+		Joins("JOIN paint_brands ON paint_brands.id = paints.brand_id").
+		Find(&out.Body.Paints).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, huma.NewError(http.StatusNotFound, "paint not found")
+		}
+		slog.Error("An error occurred when fetching paint.", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch paint")
+	}
+
 	return &out, nil
 }
 
@@ -82,7 +144,7 @@ type getPaintsInput struct {
 }
 
 type getPaintOutput struct {
-	Body db.Paints
+	Body PaintOutputDetails `json:"body"`
 }
 
 var GetPaintsOperation = huma.Operation{
@@ -92,18 +154,36 @@ var GetPaintsOperation = huma.Operation{
 }
 
 func GetPaintHandler(ctx context.Context, input *getPaintsInput) (*getPaintOutput, error) {
+	out := getPaintOutput{
+		Body: PaintOutputDetails{},
+	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
-	var paint db.Paints
-	if err := connection.First(&paint, input.Id).Error; err != nil {
+
+	err := connection.Preload("Brand").
+		Table("paints").
+		Select(`
+			paints.id AS paint_id,
+			paints.name as paint_name,
+			paints.created_at as paint_created_at,
+			paints.updated_at as paint_updated_at,
+			paints.description,
+			paints.color_code,
+			paints.brand_id
+		`).
+		Where("paints.id = ?", input.Id).
+		Find(&out.Body).Error
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, huma.NewError(http.StatusNotFound, "paint not found")
 		}
-		return nil, err
+		slog.Error("An error occurred when fetching paint.", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch paint")
 	}
-	return &getPaintOutput{Body: paint}, nil
+
+	return &out, nil
 }
 
 type updatePaintInputBody struct {
@@ -115,7 +195,7 @@ type updatePaintInput struct {
 }
 
 type updatePaintOutput struct {
-	Body db.Paints
+	Body PaintOutputDetails
 }
 
 var UpdatePaintOperation = huma.Operation{
@@ -125,17 +205,48 @@ var UpdatePaintOperation = huma.Operation{
 }
 
 func UpdatePaintHandler(ctx context.Context, input *updatePaintInput) (*updatePaintOutput, error) {
+	out := updatePaintOutput{
+		Body: PaintOutputDetails{},
+	}
+
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
 	var paint db.Paints
 	if err := connection.First(&paint, input.Id).Error; err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, huma.NewError(http.StatusNotFound, "paint not found")
+		}
+		slog.Error("An error occurred when fetching paint.", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch paint")
 	}
+
 	paint.Name = input.Body.Name
 	connection.Save(&paint)
-	return &updatePaintOutput{Body: paint}, nil
+
+	err := connection.Preload("Brand").
+		Table("paints").
+		Select(`
+			paints.id AS paint_id,
+			paints.name as paint_name,
+			paints.created_at as paint_created_at,
+			paints.updated_at as paint_updated_at,
+			paints.description,
+			paints.color_code,
+			paints.brand_id
+		`).
+		Joins("JOIN paint_brands ON paint_brands.id = paints.brand_id").
+		Find(&out.Body).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, huma.NewError(http.StatusNotFound, "paint not found")
+		}
+		slog.Error("An error occurred when fetching paint.", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch paint")
+	}
+
+	return &out, nil
 }
 
 type deletePaintInput struct {
