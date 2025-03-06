@@ -100,7 +100,6 @@ func LoginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) 
 }
 
 type refreshTokenInput struct {
-	Id int `path:"id"`
 }
 
 type refreshTokenOutputBody struct {
@@ -114,7 +113,7 @@ type refreshTokenOutput struct {
 
 var RefreshTokenOperation = huma.Operation{
 	Method: http.MethodGet,
-	Path:   "/refresh/{id}",
+	Path:   "/refresh",
 	Tags:   []string{"Users"},
 }
 
@@ -123,13 +122,17 @@ func RefreshTokenHandler(ctx context.Context, input *refreshTokenInput) (*refres
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
+	userId, ok := ctx.Value("userId").(string)
+	if !ok {
+		return nil, errors.New("could not retrieve userId from context")
+	}
 	jwt, ok := ctx.Value("jwtKey").(jwt.JWTService)
 	if !ok {
 		return nil, errors.New("could not retrieve jwt from context")
 	}
 
 	var User db.Users
-	if err := connection.First(&User, "google_user_id = ?", input.Id).Error; err != nil {
+	if err := connection.First(&User, "google_user_id = ?", userId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, huma.NewError(http.StatusNotFound, "User not found")
 		}
@@ -149,7 +152,6 @@ func RefreshTokenHandler(ctx context.Context, input *refreshTokenInput) (*refres
 }
 
 type forgetUserInput struct {
-	Id int `path:"id"`
 }
 
 type forgetUserOutput struct {
@@ -158,7 +160,7 @@ type forgetUserOutput struct {
 
 var ForgetUserOperation = huma.Operation{
 	Method: http.MethodDelete,
-	Path:   "/forget/{id}",
+	Path:   "/forget",
 	Tags:   []string{"Users"},
 }
 
@@ -167,13 +169,17 @@ func ForgetUserHandler(ctx context.Context, input *forgetUserInput) (*forgetUser
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
+	userId, ok := ctx.Value("userId").(string)
+	if !ok {
+		return nil, errors.New("could not retrieve userId from context")
+	}
 
-	user := connection.First(&db.Users{}, "google_user_id = ?", input.Id)
+	user := connection.First(&db.Users{}, "google_user_id = ?", userId)
 	if user.RowsAffected == 0 {
 		return nil, huma.NewError(http.StatusNotFound, "User not found")
 	}
 
-	if err := connection.Delete(&db.Users{}, "google_user_id = ?", input.Id).Error; err != nil {
+	if err := connection.Delete(&db.Users{}, "google_user_id = ?", userId).Error; err != nil {
 		return nil, err
 	}
 	return &forgetUserOutput{Body: "User deleted successfully"}, nil
