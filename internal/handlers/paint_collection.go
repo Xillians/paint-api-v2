@@ -123,52 +123,6 @@ func ListPaintCollectionHandler(ctx context.Context, input *listPaintCollectionI
 	return &out, nil
 }
 
-type getCollectionEntryInput struct {
-	Id int `path:"id"`
-}
-
-type getCollectionEntryOutputBody struct {
-	Paint db.PaintCollection `json:"paint"`
-}
-
-type getCollectionEntryOutput struct {
-	Body getCollectionEntryOutputBody `json:"body"`
-}
-
-var GetCollectionEntryOperation = huma.Operation{
-	Method: http.MethodGet,
-	Path:   "/collection/{id}",
-	Tags:   []string{"collection"},
-}
-
-func GetCollectionEntryHandler(ctx context.Context, input *getCollectionEntryInput) (*getCollectionEntryOutput, error) {
-	out := getCollectionEntryOutput{
-		Body: getCollectionEntryOutputBody{
-			Paint: db.PaintCollection{},
-		},
-	}
-
-	connection, ok := ctx.Value("db").(*gorm.DB)
-	if !ok {
-		return nil, errors.New("could not retrieve db from context")
-	}
-
-	err := verifyCollectionOwnership(ctx, connection, input.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	err = connection.First(&out.Body.Paint, input.Id).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, huma.NewError(http.StatusNotFound, "entry not found")
-		}
-		return nil, err
-	}
-
-	return &out, nil
-}
-
 type updateCollectionEntryInputBody struct {
 	Quantity int `json:"quantity"`
 }
