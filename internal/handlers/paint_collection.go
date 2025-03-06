@@ -17,12 +17,11 @@ type addToCollectionInputBody struct {
 	PaintId  int `json:"paint_id" validate:"required"`
 	Quantity int `json:"quantity" validate:"required"`
 }
-type addToCollectoinInput struct {
+type addToCollectionInput struct {
 	Body addToCollectionInputBody
 }
-
 type addToCollectionOutput struct {
-	Body db.PaintCollection
+	Body collectionPaintDetails `json:"body"`
 }
 
 var AddToCollectionOperation = huma.Operation{
@@ -31,7 +30,15 @@ var AddToCollectionOperation = huma.Operation{
 	Tags:   []string{"collection"},
 }
 
-func AddToCollectionHandler(ctx context.Context, input *addToCollectoinInput) (*addToCollectionOutput, error) {
+func AddToCollectionHandler(ctx context.Context, input *addToCollectionInput) (*addToCollectionOutput, error) {
+	out := addToCollectionOutput{
+		Body: collectionPaintDetails{
+			CollectionCreatedAt: time.Now(),
+			CollectionUpdatedAt: time.Now(),
+			Quantity:            input.Body.Quantity,
+			PaintID:             input.Body.PaintId,
+		},
+	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
@@ -42,7 +49,8 @@ func AddToCollectionHandler(ctx context.Context, input *addToCollectoinInput) (*
 	}
 
 	user := db.Users{}
-	if err := connection.Where("google_user_id = ?", userId).First(&user).Error; err != nil {
+	err := connection.Where("google_user_id = ?", userId).First(&user).Error
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, huma.NewError(http.StatusNotFound, "user not found")
 		}
@@ -52,17 +60,33 @@ func AddToCollectionHandler(ctx context.Context, input *addToCollectoinInput) (*
 
 	collectionEntry := db.PaintCollection{
 		UserId:    user.ID,
-		PaintId:   input.Body.PaintId,
-		Quantity:  input.Body.Quantity,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		PaintId:   out.Body.PaintID,
+		Quantity:  out.Body.Quantity,
+		CreatedAt: out.Body.CollectionCreatedAt,
+		UpdatedAt: out.Body.CollectionUpdatedAt,
 	}
 
-	if err := connection.Create(&collectionEntry).Error; err != nil {
+	err = connection.Create(&collectionEntry).Error
+	if err != nil {
 		slog.Error("An error occurred when creating entry.", "error", err)
 		return nil, huma.NewError(http.StatusInternalServerError, "could not add paint to collection")
 	}
-	return &addToCollectionOutput{Body: collectionEntry}, nil
+	slog.Info("Paint added to collection", "Id", collectionEntry.ID, "PaintId", collectionEntry.PaintId, "Quantity", collectionEntry.Quantity)
+
+	err = connection.Preload("Paint").
+		Table("paint_collections").
+		Select("paint_collections.id AS collection_id, paint_collections.quantity, paint_collections.paint_id, paint_collections.created_at as collection_created_at, paint_collections.updated_at as collection_updated_at").
+		Where("paint_collections.id = ?", collectionEntry.ID).
+		Find(&out.Body).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, huma.NewError(http.StatusNotFound, "user not found")
+		}
+		slog.Error("An error occurred when fetching collection.", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch collection")
+	}
+
+	return &out, nil
 }
 
 type listPaintCollectionInput struct {
@@ -137,7 +161,7 @@ type updateCollectionEntryOutputBody struct {
 }
 
 type updateCollectionEntryOutput struct {
-	Body updateCollectionEntryOutputBody `json:"body"`
+	Body collectionPaintDetails `json:"body"`
 }
 
 var UpdateCollectionEntryOperation = huma.Operation{
@@ -148,9 +172,7 @@ var UpdateCollectionEntryOperation = huma.Operation{
 
 func UpdateCollectionEntryHandler(ctx context.Context, input *updateCollectionEntryInput) (*updateCollectionEntryOutput, error) {
 	out := updateCollectionEntryOutput{
-		Body: updateCollectionEntryOutputBody{
-			Entry: db.PaintCollection{},
-		},
+		Body: collectionPaintDetails{},
 	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
@@ -162,14 +184,28 @@ func UpdateCollectionEntryHandler(ctx context.Context, input *updateCollectionEn
 		return nil, err
 	}
 
-	err = connection.First(&out.Body.Entry, input.Id).Error
+	var entry db.PaintCollection
+	err = connection.First(&entry, input.Id).Error
 	if err != nil {
 		return nil, err
 	}
 
-	out.Body.Entry.Quantity = input.Body.Quantity
-	out.Body.Entry.UpdatedAt = time.Now()
-	connection.Save(&out.Body.Entry)
+	entry.Quantity = input.Body.Quantity
+	entry.UpdatedAt = time.Now()
+	connection.Save(&entry)
+
+	err = connection.Preload("Paint").
+		Table("paint_collections").
+		Select("paint_collections.id AS collection_id, paint_collections.quantity, paint_collections.paint_id, paint_collections.created_at as collection_created_at, paint_collections.updated_at as collection_updated_at").
+		Where("paint_collections.id = ?", entry.ID).
+		Find(&out.Body).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, huma.NewError(http.StatusNotFound, "user not found")
+		}
+		slog.Error("An error occurred when fetching collection.", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch collection")
+	}
 
 	return &out, nil
 }
