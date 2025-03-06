@@ -14,7 +14,6 @@ import (
 )
 
 type addToCollectionInputBody struct {
-	UserId   int `json:"user_id" validate:"required"`
 	PaintId  int `json:"paint_id" validate:"required"`
 	Quantity int `json:"quantity" validate:"required"`
 }
@@ -37,8 +36,13 @@ func AddToCollectionHandler(ctx context.Context, input *addToCollectoinInput) (*
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
 	}
+	userId, ok := ctx.Value("userId").(string)
+	if !ok {
+		return nil, errors.New("could not retrieve user_id from context")
+	}
+
 	user := db.Users{}
-	if err := connection.Where("google_user_id = ?", input.Body.UserId).First(&user).Error; err != nil {
+	if err := connection.Where("google_user_id = ?", userId).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, huma.NewError(http.StatusNotFound, "user not found")
 		}
