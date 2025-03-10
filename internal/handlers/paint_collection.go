@@ -149,6 +149,7 @@ func ListPaintCollectionHandler(ctx context.Context, input *listPaintCollectionI
 
 type updateCollectionEntryInputBody struct {
 	Quantity int `json:"quantity"`
+	PaintId  int `json:"paint_id"`
 }
 
 type updateCollectionEntryInput struct {
@@ -191,6 +192,7 @@ func UpdateCollectionEntryHandler(ctx context.Context, input *updateCollectionEn
 	}
 
 	entry.Quantity = input.Body.Quantity
+	entry.PaintId = input.Body.PaintId
 	entry.UpdatedAt = time.Now()
 	connection.Save(&entry)
 
