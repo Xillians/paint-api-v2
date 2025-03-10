@@ -51,7 +51,7 @@ func RegisterUserHandler(ctx context.Context, input *RegisterUserInput) (*regist
 }
 
 type LoginInput struct {
-	GoogleUserId int `path:"id"`
+	GoogleUserId string `path:"id"`
 }
 
 type LoginOutputBody struct {
