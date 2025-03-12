@@ -40,7 +40,14 @@ func AuthenticateRequests(api huma.API, jwtService jwt.JWTService) func(huma.Con
 			huma.WriteErr(api, ctx, 401, "Unauthorized: User ID not found in token", nil)
 			return
 		}
+		role := token.Claims.(j.MapClaims)["role"]
+		if role == nil {
+			huma.WriteErr(api, ctx, 401, "Unauthorized: Role not found in token", nil)
+			return
+		}
+
 		ctx = huma.WithValue(ctx, "userId", userId)
+		ctx = huma.WithValue(ctx, "role", role)
 
 		next(ctx)
 	}
