@@ -180,6 +180,11 @@ func UpdatePaintHandler(ctx context.Context, input *updatePaintInput) (*updatePa
 		Body: paintOutputDetails{},
 	}
 
+	userRole := ctx.Value("role").(string)
+	if userRole != "administrator" {
+		return nil, huma.NewError(403, "You are not allowed to perform this action")
+	}
+
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
@@ -226,6 +231,10 @@ func DeletePaintHandler(ctx context.Context, input *deletePaintInput) (*deletePa
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
+	}
+	userRole := ctx.Value("role").(string)
+	if userRole != "administrator" {
+		return nil, huma.NewError(403, "You are not allowed to perform this action")
 	}
 	if err := connection.Delete(&db.Paints{}, input.Id).Error; err != nil {
 		return nil, err

@@ -113,6 +113,10 @@ var UpdatePaintBrandOperation = huma.Operation{
 }
 
 func UpdatePaintBrandHandler(ctx context.Context, input *updateBrandInput) (*updateBrandOutput, error) {
+	userRole := ctx.Value("role").(string)
+	if userRole != "administrator" {
+		return nil, huma.NewError(403, "You are not allowed to perform this action")
+	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
@@ -141,6 +145,10 @@ var DeletePaintBrandOperation = huma.Operation{
 }
 
 func DeletePaintBrandHandler(ctx context.Context, input *deleteBrandInput) (*deleteBrandOutput, error) {
+	userRole := ctx.Value("role").(string)
+	if userRole != "administrator" {
+		return nil, huma.NewError(403, "You are not allowed to perform this action")
+	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")
