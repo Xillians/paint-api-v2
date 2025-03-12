@@ -15,7 +15,7 @@ import (
 
 type registerUserInputBody struct {
 	GoogleUserId string `json:"user_id" validate:"required"`
-	Email        string `json:"email"`
+	Email        string `json:"email" required:"false"`
 }
 type RegisterUserInput struct {
 	Body registerUserInputBody
@@ -44,7 +44,7 @@ func RegisterUserHandler(ctx context.Context, input *RegisterUserInput) (*regist
 
 	// regex for email validation
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	if !emailRegex.MatchString(input.Body.Email) {
+	if input.Body.Email != "" && !emailRegex.MatchString(input.Body.Email) {
 		return nil, huma.NewError(http.StatusBadRequest, "Invalid email")
 	}
 
