@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"paint-api/internal/db"
 	"paint-api/internal/jwt"
+	"regexp"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -14,6 +15,7 @@ import (
 
 type registerUserInputBody struct {
 	GoogleUserId string `json:"user_id" validate:"required"`
+	Email        string `json:"email"`
 }
 type RegisterUserInput struct {
 	Body registerUserInputBody
@@ -40,8 +42,15 @@ func RegisterUserHandler(ctx context.Context, input *RegisterUserInput) (*regist
 		return nil, huma.NewError(http.StatusConflict, "User already exists")
 	}
 
+	// regex for email validation
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	if !emailRegex.MatchString(input.Body.Email) {
+		return nil, huma.NewError(http.StatusBadRequest, "Invalid email")
+	}
+
 	User := db.Users{
 		GoogleUserId: input.Body.GoogleUserId,
+		Email:        input.Body.Email,
 		CreatedAt:    time.Now().String(),
 		UpdatedAt:    time.Now().String(),
 	}
