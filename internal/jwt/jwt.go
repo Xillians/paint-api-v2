@@ -14,10 +14,11 @@ func NewJWTService(secretKey string) *JWTService {
 	return &JWTService{secretKey: secretKey}
 }
 
-func (j *JWTService) GenerateToken(userID string) (string, error) {
+func (j *JWTService) GenerateToken(userID string, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
 		"exp":     time.Now().Add(time.Hour * 7).Unix(),
+		"role":    role,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

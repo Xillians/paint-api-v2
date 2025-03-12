@@ -88,15 +88,15 @@ func LoginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) 
 		return nil, errors.New("could not retrieve jwt from context")
 	}
 
-	var User db.Users
-	if err := connection.First(&User, "google_user_id = ?", input.GoogleUserId).Error; err != nil {
+	var user db.Users
+	if err := connection.First(&user, "google_user_id = ?", input.GoogleUserId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, huma.NewError(http.StatusNotFound, "User not found")
 		}
 		return nil, err
 	}
 
-	token, err := jwt.GenerateToken(User.GoogleUserId)
+	token, err := jwt.GenerateToken(user.GoogleUserId, user.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func RefreshTokenHandler(ctx context.Context, input *refreshTokenInput) (*refres
 		return nil, err
 	}
 
-	token, err := jwt.GenerateToken(User.GoogleUserId)
+	token, err := jwt.GenerateToken(User.GoogleUserId, User.Role)
 	if err != nil {
 		return nil, err
 	}
