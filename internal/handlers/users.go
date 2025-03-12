@@ -51,6 +51,7 @@ func RegisterUserHandler(ctx context.Context, input *RegisterUserInput) (*regist
 	User := db.Users{
 		GoogleUserId: input.Body.GoogleUserId,
 		Email:        input.Body.Email,
+		Role:         "user",
 		CreatedAt:    time.Now().String(),
 		UpdatedAt:    time.Now().String(),
 	}
