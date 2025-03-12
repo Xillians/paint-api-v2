@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"regexp"
 	"time"
 
 	"paint-api/internal/db"
@@ -49,6 +50,12 @@ var CreatePaintOperation = huma.Operation{
 }
 
 func CreatePaintHandler(ctx context.Context, input *createPaintInput) (*createPaintOutput, error) {
+	// use regex to validate color code
+	regex := regexp.MustCompile(`^#([A-Fa-f0-9]{6}$`)
+	if !regex.MatchString(input.Body.ColorCode) {
+		return nil, huma.NewError(http.StatusBadRequest, "Invalid color code")
+	}
+
 	out := createPaintOutput{
 		Body: paintOutputDetails{
 			Name:        input.Body.Name,
