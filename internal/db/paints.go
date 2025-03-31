@@ -49,6 +49,12 @@ func (p Paints) CreatePaint(connection *gorm.DB, input *CreatePaintInput) (*Pain
 		slog.Error("Failed to create paint", "error", tx.Error, "transaction", tx, "paint", paint)
 		return nil, tx.Error
 	}
+
+	tx = connection.Preload("Brand").First(&paint, paint.Id)
+	if tx.Error != nil {
+		slog.Error("Failed to fetch created paint", "error", tx.Error, "transaction", tx, "paint", paint)
+	}
+
 	return &paint, nil
 }
 
@@ -97,6 +103,12 @@ func (p Paints) UpdatePaint(connection *gorm.DB, id int, input *UpdatePaintInput
 	tx = connection.Save(&paint)
 	if tx.Error != nil {
 		slog.Error("Failed to update paint", "error", tx.Error, "transaction", tx, "paint", paint)
+		return nil, tx.Error
+	}
+
+	tx = connection.Preload("Brand").First(&paint, id)
+	if tx.Error != nil {
+		slog.Error("Failed to fetch updated paint", "error", tx.Error, "transaction", tx, "paint", paint)
 		return nil, tx.Error
 	}
 
