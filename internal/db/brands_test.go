@@ -5,6 +5,16 @@ import (
 	"testing"
 )
 
+func createTestBrand() *db.PaintBrands {
+	brand, err := db.PaintBrands{}.CreateBrand(testDB, &db.CreateBrandInput{
+		Name: "Test Brand",
+	})
+	if err != nil {
+		return nil
+	}
+	return brand
+}
+
 func TestListBrandsImplementations(t *testing.T) {
 	t.Run("List brands with empty list", func(t *testing.T) {
 		brands, err := db.PaintBrands{}.ListBrands(testDB)
@@ -15,12 +25,7 @@ func TestListBrandsImplementations(t *testing.T) {
 			t.Errorf("Expected empty list, got %v", brands)
 		}
 	})
-	_, err := db.PaintBrands{}.CreateBrand(testDB, &db.CreateBrandInput{
-		Name: "Test Brand",
-	})
-	if err != nil {
-		t.Errorf("Error creating brand: %v", err)
-	}
+	createTestBrand()
 	t.Run("List brands", func(t *testing.T) {
 		brands, err := db.PaintBrands{}.ListBrands(testDB)
 		if err != nil {
@@ -67,12 +72,7 @@ func TestCreateBrandImplementations(t *testing.T) {
 }
 
 func TestGetBrandImplementations(t *testing.T) {
-	testBrand, err := db.PaintBrands{}.CreateBrand(testDB, &db.CreateBrandInput{
-		Name: "Test Brand",
-	})
-	if err != nil {
-		t.Errorf("Error creating brand: %v", err)
-	}
+	testBrand := createTestBrand()
 
 	t.Run("Get brand", func(t *testing.T) {
 		foundBrand, err := db.PaintBrands{}.GetBrand(testDB, testBrand.ID)
@@ -102,12 +102,7 @@ func TestGetBrandImplementations(t *testing.T) {
 }
 
 func TestUpdateBrandImplementations(t *testing.T) {
-	testBrand, err := db.PaintBrands{}.CreateBrand(testDB, &db.CreateBrandInput{
-		Name: "Test Brand",
-	})
-	if err != nil {
-		t.Errorf("Error creating brand: %v", err)
-	}
+	testBrand := createTestBrand()
 
 	t.Run("Update brand", func(t *testing.T) {
 		updateInput := &db.UpdateBrandInput{
@@ -153,12 +148,6 @@ func TestUpdateBrandImplementations(t *testing.T) {
 }
 
 func TestDeleteBrandImplementations(t *testing.T) {
-	_, err := db.PaintBrands{}.CreateBrand(testDB, &db.CreateBrandInput{
-		Name: "Test Brand",
-	})
-	if err != nil {
-		t.Errorf("Error creating brand: %v", err)
-	}
 	t.Run("Delete brand", func(t *testing.T) {
 		brandInput := &db.CreateBrandInput{
 			Name: "Test Brand",
