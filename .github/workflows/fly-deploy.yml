@@ -1,10 +1,11 @@
-# See https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/
-
 name: Fly Deploy
+
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows:
+      - Build and Test # This should match the `name` field in push.yml
+    types:
+      - completed
 jobs:
   deploy:
     name: Deploy app
