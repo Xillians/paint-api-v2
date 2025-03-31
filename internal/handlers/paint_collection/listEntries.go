@@ -29,33 +29,33 @@ var ListPaintCollectionOperation = huma.Operation{
 }
 
 func ListPaintCollectionHandler(ctx context.Context, input *listPaintCollectionInput) (*listPaintCollectionOutput, error) {
-	out := listPaintCollectionOutput{
-		Body: listPaintCollectionOutputBody{
-			Collection: []db.CollectionPaintDetails{},
-		},
-	}
 	userId, ok := ctx.Value("userId").(string)
 	if !ok {
-		return nil, errors.New("could not retrieve user_id from context")
+		slog.Error("could not retrieve userId from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to list collection entries")
 	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return nil, errors.New("could not retrieve db from context")
+		slog.Error("could not retrieve db from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to list collection entries")
 	}
 
-	err := connection.
-		Preload("Paint").
-		Preload("Paint.Brand").
-		Joins("JOIN users ON users.id = paint_collections.user_id").
-		Where("users.google_user_id = ?", userId).
-		Find(&out.Body.Collection).Error
+	entries, err := db.CollectionPaintDetails{}.ListEntries(connection, userId)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, huma.NewError(http.StatusNotFound, "user not found")
+		if errors.Is(err, db.ErrRecordNotFound) {
+			return &listPaintCollectionOutput{
+				Body: listPaintCollectionOutputBody{
+					Collection: []db.CollectionPaintDetails{},
+				},
+			}, nil
 		}
-		slog.Error("An error occurred when fetching collection.", "error", err)
-		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch collection")
+		slog.Error("failed to list collection entries", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to list collection entries")
 	}
 
-	return &out, nil
+	return &listPaintCollectionOutput{
+		Body: listPaintCollectionOutputBody{
+			Collection: entries,
+		},
+	}, nil
 }
