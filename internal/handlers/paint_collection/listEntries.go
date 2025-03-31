@@ -22,13 +22,13 @@ type listPaintCollectionOutput struct {
 	Body listPaintCollectionOutputBody `json:"body"`
 }
 
-var ListPaintCollectionOperation = huma.Operation{
+var ListOperation = huma.Operation{
 	Method: http.MethodGet,
 	Path:   "/collection",
 	Tags:   []string{"collection"},
 }
 
-func ListPaintCollectionHandler(ctx context.Context, input *listPaintCollectionInput) (*listPaintCollectionOutput, error) {
+func ListHandler(ctx context.Context, input *listPaintCollectionInput) (*listPaintCollectionOutput, error) {
 	userId, ok := ctx.Value("userId").(string)
 	if !ok {
 		slog.Error("could not retrieve userId from context")

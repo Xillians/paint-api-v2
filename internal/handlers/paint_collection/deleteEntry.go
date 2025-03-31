@@ -19,16 +19,16 @@ type deleteCollectionEntryOutput struct {
 	Body string
 }
 
-var DeleteCollectionEntryOperation = huma.Operation{
+var DeleteOperation = huma.Operation{
 	Method: http.MethodDelete,
 	Path:   "/collection/{id}",
 	Tags:   []string{"collection"},
 }
 
-// DeleteCollectionEntryHandler deletes a paint from the collection
+// DeleteHandler deletes a paint from the collection
 //
 // Deletes a paint from the collection. Requires authentication, and the paint must belong to the user.
-func DeleteCollectionEntryHandler(ctx context.Context, input *deleteCollectionEntryInput) (*deleteCollectionEntryOutput, error) {
+func DeleteHandler(ctx context.Context, input *deleteCollectionEntryInput) (*deleteCollectionEntryOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")

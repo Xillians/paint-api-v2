@@ -29,13 +29,13 @@ type updateCollectionEntryOutput struct {
 	Body db.CollectionPaintDetails `json:"body"`
 }
 
-var UpdateCollectionEntryOperation = huma.Operation{
+var UpdateOperation = huma.Operation{
 	Method: http.MethodPut,
 	Path:   "/collection/{id}",
 	Tags:   []string{"collection"},
 }
 
-func UpdateCollectionEntryHandler(ctx context.Context, input *updateCollectionEntryInput) (*updateCollectionEntryOutput, error) {
+func UpdateHandler(ctx context.Context, input *updateCollectionEntryInput) (*updateCollectionEntryOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("Could not get database connection from context.")

@@ -28,8 +28,8 @@ func RegisterRoutes(api huma.API) {
 	huma.Register(api, users.RefreshTokenOperation, users.RefreshTokenHandler)
 	huma.Register(api, users.ForgetOperation, users.ForgetHandler)
 
-	huma.Register(api, paint_collection.AddToCollectionOperation, paint_collection.AddToCollectionHandler)
-	huma.Register(api, paint_collection.DeleteCollectionEntryOperation, paint_collection.DeleteCollectionEntryHandler)
-	huma.Register(api, paint_collection.ListPaintCollectionOperation, paint_collection.ListPaintCollectionHandler)
-	huma.Register(api, paint_collection.UpdateCollectionEntryOperation, paint_collection.UpdateCollectionEntryHandler)
+	huma.Register(api, paint_collection.CreateOperation, paint_collection.CreateHandler)
+	huma.Register(api, paint_collection.DeleteOperation, paint_collection.DeleteHandler)
+	huma.Register(api, paint_collection.ListOperation, paint_collection.ListHandler)
+	huma.Register(api, paint_collection.UpdateOperation, paint_collection.UpdateHandler)
 }
