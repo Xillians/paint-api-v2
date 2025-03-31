@@ -20,6 +20,11 @@ tasks:
     desc: "Run tests"
     cmds:
       - "go test ./..."
+  
+  test:coverage:
+    desc: "Run tests with coverage"
+    cmds:
+      - "go test --cover ./..."
 
   clean:
     desc: "Clean the build artifacts"
