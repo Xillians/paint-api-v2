@@ -10,11 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
-type createBrandInputBody struct {
-	Name string `json:"name"`
-}
 type createbrandInput struct {
-	Body createBrandInputBody
+	Body db.CreateBrandInput `json:"body"`
 }
 
 type createBrandOutput struct {
