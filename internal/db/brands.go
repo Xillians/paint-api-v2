@@ -8,3 +8,7 @@ type PaintBrands struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+func (b PaintBrands) TableName() string {
+	return "brands"
+}

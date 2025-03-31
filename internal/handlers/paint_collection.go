@@ -13,19 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type collectionPaintDetails struct {
-	ID        int                `json:"id" gorm:"primaryKey"`
-	Quantity  int                `json:"quantity"`
-	PaintID   int                `json:"-" gorm:"not null"`
-	CreatedAt time.Time          `json:"created_at"`
-	UpdatedAt time.Time          `json:"updated_at"`
-	Paint     paintOutputDetails `json:"paint" gorm:"foreignKey:PaintID"`
-}
-
-func (c collectionPaintDetails) TableName() string {
-	return "paint_collections"
-}
-
 type addToCollectionInputBody struct {
 	PaintId  int `json:"paint_id" validate:"required"`
 	Quantity int `json:"quantity" validate:"required"`
@@ -34,7 +21,7 @@ type addToCollectionInput struct {
 	Body addToCollectionInputBody
 }
 type addToCollectionOutput struct {
-	Body collectionPaintDetails `json:"body"`
+	Body db.CollectionPaintDetails `json:"body"`
 }
 
 var AddToCollectionOperation = huma.Operation{
@@ -45,7 +32,7 @@ var AddToCollectionOperation = huma.Operation{
 
 func AddToCollectionHandler(ctx context.Context, input *addToCollectionInput) (*addToCollectionOutput, error) {
 	out := addToCollectionOutput{
-		Body: collectionPaintDetails{
+		Body: db.CollectionPaintDetails{
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 			Quantity:  input.Body.Quantity,
@@ -102,7 +89,7 @@ type listPaintCollectionInput struct {
 }
 
 type listPaintCollectionOutputBody struct {
-	Collection []collectionPaintDetails `json:"collection"`
+	Collection []db.CollectionPaintDetails `json:"collection"`
 }
 
 type listPaintCollectionOutput struct {
@@ -118,7 +105,7 @@ var ListPaintCollectionOperation = huma.Operation{
 func ListPaintCollectionHandler(ctx context.Context, input *listPaintCollectionInput) (*listPaintCollectionOutput, error) {
 	out := listPaintCollectionOutput{
 		Body: listPaintCollectionOutputBody{
-			Collection: []collectionPaintDetails{},
+			Collection: []db.CollectionPaintDetails{},
 		},
 	}
 	userId, ok := ctx.Value("userId").(string)
@@ -162,7 +149,7 @@ type updateCollectionEntryOutputBody struct {
 }
 
 type updateCollectionEntryOutput struct {
-	Body collectionPaintDetails `json:"body"`
+	Body db.CollectionPaintDetails `json:"body"`
 }
 
 var UpdateCollectionEntryOperation = huma.Operation{
@@ -173,7 +160,7 @@ var UpdateCollectionEntryOperation = huma.Operation{
 
 func UpdateCollectionEntryHandler(ctx context.Context, input *updateCollectionEntryInput) (*updateCollectionEntryOutput, error) {
 	out := updateCollectionEntryOutput{
-		Body: collectionPaintDetails{},
+		Body: db.CollectionPaintDetails{},
 	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {

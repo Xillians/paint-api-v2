@@ -8,3 +8,7 @@ type Users struct {
 	CreatedAt    string `json:"created_at"`
 	UpdatedAt    string `json:"updated_at"`
 }
+
+func (u Users) TableName() string {
+	return "users"
+}

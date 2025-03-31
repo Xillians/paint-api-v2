@@ -14,21 +14,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type paintOutputDetails struct {
-	Id          int            `json:"id" gorm:"primaryKey"`
-	Name        string         `json:"name"`
-	BrandId     int            `json:"-" gorm:"not null"`
-	ColorCode   string         `json:"color_code"`
-	Description string         `json:"description"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	Brand       db.PaintBrands `json:"brand" gorm:"foreignKey:BrandId"`
-}
-
-func (p paintOutputDetails) TableName() string {
-	return "paints"
-}
-
 type createPaintInputBody struct {
 	Name        string `json:"name" validate:"required"`
 	BrandId     int    `json:"brand_id" validate:"required"`
@@ -40,7 +25,7 @@ type createPaintInput struct {
 }
 
 type createPaintOutput struct {
-	Body paintOutputDetails
+	Body db.PaintOutputDetails
 }
 
 var CreatePaintOperation = huma.Operation{
@@ -51,13 +36,15 @@ var CreatePaintOperation = huma.Operation{
 
 func CreatePaintHandler(ctx context.Context, input *createPaintInput) (*createPaintOutput, error) {
 	// use regex to validate color code
-	regex := regexp.MustCompile(`^#([A-Fa-f0-9]{6}$`)
+	slog.Info("Validating color code")
+	regex := regexp.MustCompile(`^#([A-Fa-f0-9]{6})$`)
+	slog.Info("regex", "regex", regex)
 	if !regex.MatchString(input.Body.ColorCode) {
 		return nil, huma.NewError(http.StatusBadRequest, "Invalid color code")
 	}
 
 	out := createPaintOutput{
-		Body: paintOutputDetails{
+		Body: db.PaintOutputDetails{
 			Name:        input.Body.Name,
 			ColorCode:   input.Body.ColorCode,
 			Description: input.Body.Description,
@@ -93,7 +80,7 @@ type listPaintInput struct {
 }
 
 type listPaintOutputBody struct {
-	Paints []paintOutputDetails `json:"paints"`
+	Paints []db.CollectionPaintDetails `json:"paints"`
 }
 
 type listPaintOutput struct {
@@ -109,7 +96,7 @@ var ListPaintsOperation = huma.Operation{
 func ListPaintsHandler(ctx context.Context, input *listPaintInput) (*listPaintOutput, error) {
 	out := listPaintOutput{
 		Body: listPaintOutputBody{
-			Paints: []paintOutputDetails{},
+			Paints: []db.CollectionPaintDetails{},
 		},
 	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
@@ -134,7 +121,7 @@ type getPaintsInput struct {
 }
 
 type getPaintOutput struct {
-	Body paintOutputDetails `json:"body"`
+	Body db.CollectionPaintDetails `json:"body"`
 }
 
 var GetPaintsOperation = huma.Operation{
@@ -145,7 +132,7 @@ var GetPaintsOperation = huma.Operation{
 
 func GetPaintHandler(ctx context.Context, input *getPaintsInput) (*getPaintOutput, error) {
 	out := getPaintOutput{
-		Body: paintOutputDetails{},
+		Body: db.CollectionPaintDetails{},
 	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
@@ -173,7 +160,7 @@ type updatePaintInput struct {
 }
 
 type updatePaintOutput struct {
-	Body paintOutputDetails
+	Body db.CollectionPaintDetails
 }
 
 var UpdatePaintOperation = huma.Operation{
@@ -184,7 +171,7 @@ var UpdatePaintOperation = huma.Operation{
 
 func UpdatePaintHandler(ctx context.Context, input *updatePaintInput) (*updatePaintOutput, error) {
 	out := updatePaintOutput{
-		Body: paintOutputDetails{},
+		Body: db.CollectionPaintDetails{},
 	}
 
 	userRole := ctx.Value("role").(string)
