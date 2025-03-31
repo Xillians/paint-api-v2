@@ -5,7 +5,7 @@ tasks:
     desc: "Install dependencies"
     cmds:
       - "go mod tidy"
-      
+
   run:
     desc: "Run the Go project"
     cmds:
@@ -14,7 +14,7 @@ tasks:
   build:
     desc: "Build the Go project"
     cmds:
-      - "go build -o bin/main ./cmd/main/main.go"
+      - "go build -o bin/main ./main.go"
 
   test:
     desc: "Run tests"
