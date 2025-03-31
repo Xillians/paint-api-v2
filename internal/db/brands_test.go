@@ -112,9 +112,6 @@ func TestUpdateBrandImplementations(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error updating brand: %v", err)
 		}
-		if updatedBrand == nil {
-			t.Errorf("Expected updated brand, got nil")
-		}
 		if updatedBrand.Name != updateInput.Name {
 			t.Errorf("Expected updated brand name to be %s, got %s", updateInput.Name, updatedBrand.Name)
 		}

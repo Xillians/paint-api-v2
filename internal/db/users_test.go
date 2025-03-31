@@ -27,9 +27,6 @@ func TestCreateUser(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error registering user: %v", err)
 		}
-		if user == nil {
-			t.Errorf("Expected created user, got nil")
-		}
 
 		err = db.Users{}.DeleteUserByGoogleId(testDB, user.GoogleUserId)
 	})
@@ -84,7 +81,10 @@ func TestGetUserByGoogleId(t *testing.T) {
 		}
 	})
 	t.Cleanup(func() {
-		db.Users{}.DeleteUserByGoogleId(testDB, user.GoogleUserId)
+		err := db.Users{}.DeleteUserByGoogleId(testDB, user.GoogleUserId)
+		if err != nil {
+			t.Errorf("Error deleting user by google id: %v", err)
+		}
 	})
 }
 
@@ -115,6 +115,9 @@ func TestDeleteUser(t *testing.T) {
 		}
 	})
 	t.Cleanup(func() {
-		db.Users{}.DeleteUserByGoogleId(testDB, user.GoogleUserId)
+		err := db.Users{}.DeleteUserByGoogleId(testDB, user.GoogleUserId)
+		if err != nil {
+			t.Errorf("Error deleting user by google id: %v", err)
+		}
 	})
 }
