@@ -31,7 +31,7 @@ jobs:
           check-latest: true
         
       - name: Setup 🛠
-        run: task setup
+        run: task install
 
       - name: Build 🏗
         run: task build
