@@ -21,13 +21,13 @@ type addToCollectionOutput struct {
 	Body db.CollectionPaintDetails `json:"body"`
 }
 
-var CreateOperation = huma.Operation{
+var createOperation = huma.Operation{
 	Method: http.MethodPost,
 	Path:   "/collection",
 	Tags:   []string{"collection"},
 }
 
-func CreateHandler(ctx context.Context, input *addToCollectionInput) (*addToCollectionOutput, error) {
+func createHandler(ctx context.Context, input *addToCollectionInput) (*addToCollectionOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")

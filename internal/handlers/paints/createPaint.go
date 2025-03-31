@@ -20,13 +20,13 @@ type createPaintOutput struct {
 	Body db.Paints
 }
 
-var CreateOperation = huma.Operation{
+var createOperation = huma.Operation{
 	Method: http.MethodPost,
 	Path:   "/paints",
 	Tags:   []string{"paints"},
 }
 
-func CreateHandler(ctx context.Context, input *createPaintInput) (*createPaintOutput, error) {
+func createHandler(ctx context.Context, input *createPaintInput) (*createPaintOutput, error) {
 	if !validateColorCode(input.Body.ColorCode) {
 		return nil, huma.NewError(400, "Invalid color code")
 	}

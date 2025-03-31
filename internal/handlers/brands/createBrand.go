@@ -21,13 +21,13 @@ type createBrandOutput struct {
 	Body db.PaintBrands
 }
 
-var CreateOperation = huma.Operation{
+var createOperation = huma.Operation{
 	Method: http.MethodPost,
 	Path:   "/paint-brands",
 	Tags:   []string{"paint-brands"},
 }
 
-func CreateHandler(ctx context.Context, input *createbrandInput) (*createBrandOutput, error) {
+func createHandler(ctx context.Context, input *createbrandInput) (*createBrandOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")

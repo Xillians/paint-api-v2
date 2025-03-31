@@ -7,9 +7,12 @@ import (
 	"os"
 	"paint-api/internal/config"
 	"paint-api/internal/db"
+	"paint-api/internal/handlers/brands"
+	"paint-api/internal/handlers/paint_collection"
+	"paint-api/internal/handlers/paints"
+	"paint-api/internal/handlers/users"
 	"paint-api/internal/jwt"
 	"paint-api/internal/middleware"
-	"paint-api/internal/routes"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
@@ -52,7 +55,10 @@ func main() {
 	api.UseMiddleware(middleware.UseJwt(*jwtService))
 	api.UseMiddleware(middleware.AuthenticateRequests(api, *jwtService))
 
-	routes.RegisterRoutes(api)
+	brands.RegisterRoutes(api)
+	paint_collection.RegisterRoutes(api)
+	paints.RegisterRoutes(api)
+	users.RegisterRoutes(api)
 
 	slog.Info("Starting server", "port", c.HttpPort)
 	err = http.ListenAndServe(fmt.Sprintf(":%d", c.HttpPort), mux)

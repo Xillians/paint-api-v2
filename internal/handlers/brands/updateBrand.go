@@ -23,13 +23,13 @@ type updateBrandOutput struct {
 	Body db.PaintBrands
 }
 
-var UpdateOperation = huma.Operation{
+var updateOperation = huma.Operation{
 	Method: http.MethodPut,
 	Path:   "/paint-brands/{id}",
 	Tags:   []string{"paint-brands"},
 }
 
-func UpdateHandler(ctx context.Context, input *updateBrandInput) (*updateBrandOutput, error) {
+func updateHandler(ctx context.Context, input *updateBrandInput) (*updateBrandOutput, error) {
 	userRole := ctx.Value("role").(string)
 	if userRole != "administrator" {
 		return nil, huma.NewError(403, "You are not allowed to perform this action")

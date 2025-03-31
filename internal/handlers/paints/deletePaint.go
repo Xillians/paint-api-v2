@@ -19,13 +19,13 @@ type deletePaintOutput struct {
 	Body string
 }
 
-var DeleteOperation = huma.Operation{
+var deleteOperation = huma.Operation{
 	Method: http.MethodDelete,
 	Path:   "/paints/{id}",
 	Tags:   []string{"paints"},
 }
 
-func DeleteHandler(ctx context.Context, input *deletePaintInput) (*deletePaintOutput, error) {
+func deleteHandler(ctx context.Context, input *deletePaintInput) (*deletePaintOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")

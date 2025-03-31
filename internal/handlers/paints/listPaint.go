@@ -22,13 +22,13 @@ type listPaintOutput struct {
 	Body listPaintOutputBody `json:"body"`
 }
 
-var ListOperation = huma.Operation{
+var listOperation = huma.Operation{
 	Method: http.MethodGet,
 	Path:   "/paints",
 	Tags:   []string{"paints"},
 }
 
-func ListHandler(ctx context.Context, input *listPaintInput) (*listPaintOutput, error) {
+func listHandler(ctx context.Context, input *listPaintInput) (*listPaintOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")

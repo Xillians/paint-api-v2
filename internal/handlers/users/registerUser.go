@@ -20,13 +20,13 @@ type registerUserOutput struct {
 	Body db.Users
 }
 
-var RegisterOperation = huma.Operation{
+var registerOperation = huma.Operation{
 	Method: http.MethodPost,
 	Path:   "/register",
 	Tags:   []string{"Users"},
 }
 
-func RegisterHandler(ctx context.Context, input *RegisterUserInput) (*registerUserOutput, error) {
+func registerHandler(ctx context.Context, input *RegisterUserInput) (*registerUserOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")

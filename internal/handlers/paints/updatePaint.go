@@ -23,13 +23,13 @@ type updatePaintOutput struct {
 	Body db.CollectionPaintDetails
 }
 
-var UpdateOperation = huma.Operation{
+var updateOperation = huma.Operation{
 	Method: http.MethodPut,
 	Path:   "/paints/{id}",
 	Tags:   []string{"paints"},
 }
 
-func UpdateHandler(ctx context.Context, input *updatePaintInput) (*updatePaintOutput, error) {
+func updateHandler(ctx context.Context, input *updatePaintInput) (*updatePaintOutput, error) {
 	out := updatePaintOutput{
 		Body: db.CollectionPaintDetails{},
 	}

@@ -19,13 +19,13 @@ type getPaintOutput struct {
 	Body db.Paints `json:"body"`
 }
 
-var GetOperation = huma.Operation{
+var getOperation = huma.Operation{
 	Method: http.MethodGet,
 	Path:   "/paints/{id}",
 	Tags:   []string{"paints"},
 }
 
-func GetHandler(ctx context.Context, input *getPaintsInput) (*getPaintOutput, error) {
+func getHandler(ctx context.Context, input *getPaintsInput) (*getPaintOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		return nil, errors.New("could not retrieve db from context")

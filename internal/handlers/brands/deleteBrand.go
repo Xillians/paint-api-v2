@@ -19,13 +19,13 @@ type deleteBrandOutput struct {
 	Body string
 }
 
-var DeleteOperation = huma.Operation{
+var deleteOperation = huma.Operation{
 	Method: http.MethodDelete,
 	Path:   "/paint-brands/{id}",
 	Tags:   []string{"paint-brands"},
 }
 
-func DeleteHandler(ctx context.Context, input *deleteBrandInput) (*deleteBrandOutput, error) {
+func deleteHandler(ctx context.Context, input *deleteBrandInput) (*deleteBrandOutput, error) {
 	userRole := ctx.Value("role").(string)
 	if userRole != "administrator" {
 		return nil, huma.NewError(403, "You are not allowed to perform this action")

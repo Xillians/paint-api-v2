@@ -18,13 +18,13 @@ type forgetUserOutput struct {
 	Body string
 }
 
-var ForgetOperation = huma.Operation{
+var forgetOperation = huma.Operation{
 	Method: http.MethodDelete,
 	Path:   "/forget",
 	Tags:   []string{"Users"},
 }
 
-func ForgetHandler(ctx context.Context, input *forgetUserInput) (*forgetUserOutput, error) {
+func forgetHandler(ctx context.Context, input *forgetUserInput) (*forgetUserOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")

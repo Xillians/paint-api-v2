@@ -21,13 +21,13 @@ type listBrandOutput struct {
 	Body listBrandOutputBody `json:"body"`
 }
 
-var ListOperation = huma.Operation{
+var listOperation = huma.Operation{
 	Method: http.MethodGet,
 	Path:   "/paint-brands",
 	Tags:   []string{"paint-brands"},
 }
 
-func ListHandler(ctx context.Context, input *listBrandInput) (*listBrandOutput, error) {
+func listHandler(ctx context.Context, input *listBrandInput) (*listBrandOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")

@@ -26,13 +26,13 @@ type LoginOutput struct {
 	Body LoginOutputBody
 }
 
-var LoginOperation = huma.Operation{
+var loginOperation = huma.Operation{
 	Method: http.MethodGet,
 	Path:   "/login/{id}",
 	Tags:   []string{"Users"},
 }
 
-func LoginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) {
+func loginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")

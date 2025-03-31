@@ -25,13 +25,13 @@ type refreshTokenOutput struct {
 	Body refreshTokenOutputBody
 }
 
-var RefreshTokenOperation = huma.Operation{
+var refreshTokenOperation = huma.Operation{
 	Method: http.MethodGet,
 	Path:   "/refresh",
 	Tags:   []string{"Users"},
 }
 
-func RefreshTokenHandler(ctx context.Context, input *refreshTokenInput) (*refreshTokenOutput, error) {
+func refreshTokenHandler(ctx context.Context, input *refreshTokenInput) (*refreshTokenOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")
