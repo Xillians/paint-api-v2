@@ -18,34 +18,26 @@ jobs:
           --mount type=tmpfs,destination=/data
 
     steps:
-      - name: Checkout code
+      - name: Checkout code 🔎
         uses: actions/checkout@v3
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
+      - name: Install Task  📦
+        uses: arduino/setup-task@v1
+
+      - name: Setup Go 🛠
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.20
+          go-version: 1.21
+          check-latest: true
+        
+      - name: Setup 🛠
+        run: task setup
 
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      - name: Install Task CLI
-        run: |
-          sudo sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
-
-      - name: Install dependencies 📦
-        run: task install
+      - name: Build 🏗
+        run: task build
 
       - name: Run tests 🧪
         run: task test
 
-      - name: Lint code 💅
-        run: task lint
-      
-      - name: Build 🏗️
-        run: task build
+      - name: Lint 💅
+        uses: golangci/golangci-lint-action@v6
