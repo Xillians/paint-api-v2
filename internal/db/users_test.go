@@ -29,6 +29,9 @@ func TestCreateUser(t *testing.T) {
 		}
 
 		err = db.Users{}.DeleteUserByGoogleId(testDB, user.GoogleUserId)
+		if err != nil {
+			t.Errorf("Error deleting user by google id: %v", err)
+		}
 	})
 	t.Run("Attempt to register user with existing google user id", func(t *testing.T) {
 		_, err := db.Users{}.RegisterUser(testDB, testInput)
