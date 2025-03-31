@@ -27,6 +27,13 @@ func NewConfig() *Config {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	if c.IsTest() {
+		c.DbConfig.DatabseUrl = "file::memory:?cache=shared"
+		c.DbConfig.AuthToken = "test-auth-token"
+		c.JwtSecret = "test-jwt-secret"
+	}
+
 	c.LogLevel = parseLogLevel(os.Getenv("LOG_LEVEL"))
 	return &c
 }
@@ -52,6 +59,9 @@ func (c *Config) GetLogLevel() slog.Level {
 
 func (c *Config) IsDevelopment() bool {
 	return c.Environment == "development"
+}
+func (c *Config) IsTest() bool {
+	return c.Environment == "test"
 }
 
 func (c *Config) IsProduction() bool {
