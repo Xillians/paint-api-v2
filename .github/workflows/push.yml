@@ -26,6 +26,18 @@ jobs:
         with:
           go-version: 1.20
 
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install Task CLI
+        run: |
+          sudo sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+
       - name: Install dependencies 📦
         run: task install
 
