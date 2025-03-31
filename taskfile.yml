@@ -1,6 +1,11 @@
 version: 'v3'
 
 tasks:
+  install:
+    desc: "Install dependencies"
+    cmds:
+      - "go mod tidy"
+      
   run:
     desc: "Run the Go project"
     cmds:
