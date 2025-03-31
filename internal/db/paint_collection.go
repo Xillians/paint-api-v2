@@ -57,7 +57,7 @@ func (c CollectionPaintDetails) CreateEntry(connection *gorm.DB, input CreateCol
 		return nil, tx.Error
 	}
 
-	tx = connection.Preload("Paint").Preload("Paint.Brand").First(&entry, entry.ID)
+	tx = connection.Preload("User").Preload("Paint").Preload("Paint.Brand").First(&entry, entry.ID)
 	if tx.Error != nil {
 		slog.Error("Failed to fetch created entry", "error", tx.Error, "transaction", tx, "entry", entry)
 		return nil, tx.Error
