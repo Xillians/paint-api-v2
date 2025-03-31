@@ -13,17 +13,6 @@ import (
 
 var testDB *gorm.DB
 
-func TestMain(m *testing.M) {
-	testDB = OpenTestConnection()
-
-	code := m.Run()
-
-	sqlDB, _ := testDB.DB()
-	sqlDB.Close()
-
-	os.Exit(code)
-}
-
 // Opens a in memory database connection for testing purposes.
 // This runs a migration on the database to ensure the schema is up to date.
 //
@@ -46,4 +35,29 @@ func OpenTestConnection() *gorm.DB {
 		log.Fatalf("Failed to migrate test database: %v", err)
 	}
 	return output
+}
+
+func TestMain(m *testing.M) {
+	testDB = OpenTestConnection()
+
+	testDB.Exec("PRAGMA foreign_keys = ON")
+
+	code := m.Run()
+
+	sqlDB, _ := testDB.DB()
+	sqlDB.Close()
+
+	os.Exit(code)
+}
+
+func TestInitializeDB(t *testing.T) {
+	t.Run("Failure to connect to database", func(t *testing.T) {
+		cfg := &config.DbConfig{
+			DatabseUrl: "file::memory:?cache=shared",
+		}
+		_, err := db.New(cfg)
+		if err == nil {
+			t.Error("Expected error connecting to database")
+		}
+	})
 }
