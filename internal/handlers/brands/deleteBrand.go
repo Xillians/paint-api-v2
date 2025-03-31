@@ -15,7 +15,7 @@ type deleteBrandInput struct {
 	ID uint `path:"id" example:"1" required:"true"`
 }
 
-type deleteBrandOutput struct {
+type DeleteBrandOutput struct {
 	Body string
 }
 
@@ -25,7 +25,7 @@ var deleteOperation = huma.Operation{
 	Tags:   []string{"paint-brands"},
 }
 
-func deleteHandler(ctx context.Context, input *deleteBrandInput) (*deleteBrandOutput, error) {
+func deleteHandler(ctx context.Context, input *deleteBrandInput) (*DeleteBrandOutput, error) {
 	userRole := ctx.Value("role").(string)
 	if userRole != "administrator" {
 		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
@@ -45,5 +45,5 @@ func deleteHandler(ctx context.Context, input *deleteBrandInput) (*deleteBrandOu
 		return nil, huma.NewError(http.StatusInternalServerError, "Failed to delete brand")
 	}
 
-	return &deleteBrandOutput{Body: "Brand deleted successfully"}, nil
+	return &DeleteBrandOutput{Body: "Brand deleted successfully"}, nil
 }

@@ -105,7 +105,7 @@ func TestGetEntry(t *testing.T) {
 			GoogleUserId: "new_user",
 			Email:        "asd@fgh.io",
 		}
-		newUser, err := db.Users{}.RegisterUser(testDB, newUserInput)
+		newUser, err := db.Users{}.RegisterUser(testDB, newUserInput, "user")
 		if err != nil {
 			t.Errorf("Error registering new user: %v", err)
 		}

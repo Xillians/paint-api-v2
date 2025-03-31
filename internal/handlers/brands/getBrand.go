@@ -14,7 +14,7 @@ type getBrandInput struct {
 	ID uint `path:"id" example:"1" required:"true"`
 }
 
-type getBrandOutput struct {
+type GetBrandOutput struct {
 	Body db.PaintBrands
 }
 
@@ -24,7 +24,7 @@ var getOperation = huma.Operation{
 	Tags:   []string{"paint-brands"},
 }
 
-func getHandler(ctx context.Context, input *getBrandInput) (*getBrandOutput, error) {
+func getHandler(ctx context.Context, input *getBrandInput) (*GetBrandOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
@@ -37,5 +37,5 @@ func getHandler(ctx context.Context, input *getBrandInput) (*getBrandOutput, err
 		return nil, huma.NewError(http.StatusInternalServerError, "Failed to get brand")
 	}
 
-	return &getBrandOutput{Body: *brand}, nil
+	return &GetBrandOutput{Body: *brand}, nil
 }

@@ -17,7 +17,7 @@ type listBrandOutputBody struct {
 	Brands []db.PaintBrands `json:"brands"`
 }
 
-type listBrandOutput struct {
+type ListBrandOutput struct {
 	Body listBrandOutputBody `json:"body"`
 }
 
@@ -27,7 +27,7 @@ var listOperation = huma.Operation{
 	Tags:   []string{"paint-brands"},
 }
 
-func listHandler(ctx context.Context, input *listBrandInput) (*listBrandOutput, error) {
+func listHandler(ctx context.Context, input *listBrandInput) (*ListBrandOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
@@ -40,5 +40,5 @@ func listHandler(ctx context.Context, input *listBrandInput) (*listBrandOutput, 
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to list brands")
 	}
 
-	return &listBrandOutput{Body: listBrandOutputBody{Brands: brands}}, nil
+	return &ListBrandOutput{Body: listBrandOutputBody{Brands: brands}}, nil
 }

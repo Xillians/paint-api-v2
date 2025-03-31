@@ -19,7 +19,7 @@ type updateBrandInput struct {
 	Body updateBrandInputBody
 }
 
-type updateBrandOutput struct {
+type UpdateBrandOutput struct {
 	Body db.PaintBrands
 }
 
@@ -29,7 +29,7 @@ var updateOperation = huma.Operation{
 	Tags:   []string{"paint-brands"},
 }
 
-func updateHandler(ctx context.Context, input *updateBrandInput) (*updateBrandOutput, error) {
+func updateHandler(ctx context.Context, input *updateBrandInput) (*UpdateBrandOutput, error) {
 	userRole := ctx.Value("role").(string)
 	if userRole != "administrator" {
 		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
@@ -53,5 +53,5 @@ func updateHandler(ctx context.Context, input *updateBrandInput) (*updateBrandOu
 		slog.Error("Failed to update brand", "error", err, "id", input.ID)
 		return nil, huma.NewError(http.StatusInternalServerError, "Failed to update brand")
 	}
-	return &updateBrandOutput{Body: *brand}, nil
+	return &UpdateBrandOutput{Body: *brand}, nil
 }

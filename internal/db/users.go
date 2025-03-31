@@ -24,7 +24,7 @@ type RegisterUserInput struct {
 	Email        string `json:"email" required:"false"`
 }
 
-func (u Users) RegisterUser(connection *gorm.DB, input RegisterUserInput) (*Users, error) {
+func (u Users) RegisterUser(connection *gorm.DB, input RegisterUserInput, role string) (*Users, error) {
 	user := connection.First(&Users{}, "google_user_id = ?", input.GoogleUserId)
 	if user.RowsAffected > 0 {
 		return nil, ErrRecordExists
@@ -33,7 +33,7 @@ func (u Users) RegisterUser(connection *gorm.DB, input RegisterUserInput) (*User
 	User := Users{
 		GoogleUserId: input.GoogleUserId,
 		Email:        input.Email,
-		Role:         "user",
+		Role:         role,
 		CreatedAt:    "time.Now().String()",
 		UpdatedAt:    "time.Now().String()",
 	}

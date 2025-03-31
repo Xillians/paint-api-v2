@@ -36,7 +36,7 @@ func registerHandler(ctx context.Context, input *RegisterUserInput) (*registerUs
 		return nil, huma.NewError(http.StatusBadRequest, "invalid email")
 	}
 
-	user, err := db.Users{}.RegisterUser(connection, input.Body)
+	user, err := db.Users{}.RegisterUser(connection, input.Body, "user")
 	if err != nil {
 		if errors.Is(err, db.ErrRecordExists) {
 			return nil, huma.NewError(http.StatusConflict, "User already exists")

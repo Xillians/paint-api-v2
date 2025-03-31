@@ -14,7 +14,7 @@ type createbrandInput struct {
 	Body db.CreateBrandInput `json:"body"`
 }
 
-type createBrandOutput struct {
+type CreateBrandOutput struct {
 	Body db.PaintBrands
 }
 
@@ -24,7 +24,7 @@ var createOperation = huma.Operation{
 	Tags:   []string{"paint-brands"},
 }
 
-func createHandler(ctx context.Context, input *createbrandInput) (*createBrandOutput, error) {
+func createHandler(ctx context.Context, input *createbrandInput) (*CreateBrandOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
@@ -36,5 +36,5 @@ func createHandler(ctx context.Context, input *createbrandInput) (*createBrandOu
 		return nil, huma.NewError(http.StatusInternalServerError, "Failed to create brand")
 	}
 
-	return &createBrandOutput{Body: *brand}, nil
+	return &CreateBrandOutput{Body: *brand}, nil
 }

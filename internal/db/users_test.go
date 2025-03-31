@@ -10,7 +10,7 @@ func createTestUser() *db.Users {
 		GoogleUserId: "1234567890",
 		Email:        "test@testerson.io",
 	}
-	user, err := db.Users{}.RegisterUser(testDB, input)
+	user, err := db.Users{}.RegisterUser(testDB, input, "user")
 	if err != nil {
 		return nil
 	}
@@ -23,7 +23,7 @@ func TestCreateUser(t *testing.T) {
 		Email:        "",
 	}
 	t.Run("Register user", func(t *testing.T) {
-		user, err := db.Users{}.RegisterUser(testDB, testInput)
+		user, err := db.Users{}.RegisterUser(testDB, testInput, "user")
 		if err != nil {
 			t.Errorf("Error registering user: %v", err)
 		}
@@ -34,12 +34,12 @@ func TestCreateUser(t *testing.T) {
 		}
 	})
 	t.Run("Attempt to register user with existing google user id", func(t *testing.T) {
-		_, err := db.Users{}.RegisterUser(testDB, testInput)
+		_, err := db.Users{}.RegisterUser(testDB, testInput, "user")
 		if err != nil {
 			t.Errorf("Error registering user: %v", err)
 		}
 
-		_, err = db.Users{}.RegisterUser(testDB, testInput)
+		_, err = db.Users{}.RegisterUser(testDB, testInput, "user")
 		if err == nil {
 			t.Errorf("Expected duplicate error!")
 		}
@@ -49,7 +49,7 @@ func TestCreateUser(t *testing.T) {
 		sql, _ := connection.DB()
 		sql.Close()
 
-		_, err := db.Users{}.RegisterUser(connection, testInput)
+		_, err := db.Users{}.RegisterUser(connection, testInput, "user")
 		if err == nil {
 			t.Errorf("Expected error registering user with nil db, got nil")
 		}
