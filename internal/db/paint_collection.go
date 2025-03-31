@@ -81,9 +81,13 @@ func (c CollectionPaintDetails) UpdateEntry(connection *gorm.DB, input UpdateCol
 }
 
 // Lists all entries in the collection that belong to the user.
-func (c CollectionPaintDetails) ListEntries(connection *gorm.DB, userId int) ([]CollectionPaintDetails, error) {
+func (c CollectionPaintDetails) ListEntries(connection *gorm.DB, googleUserId string) ([]CollectionPaintDetails, error) {
 	var entries []CollectionPaintDetails
-	tx := connection.Preload("Paint").Find(&entries).Where("user_id = ?", userId)
+	tx := connection.
+		Joins("JOIN users ON users.id = paint_collections.user_id").
+		Preload("Paint").
+		Where("users.google_user_id = ?", googleUserId).
+		Find(&entries)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return nil, ErrRecordNotFound
@@ -91,6 +95,21 @@ func (c CollectionPaintDetails) ListEntries(connection *gorm.DB, userId int) ([]
 		return nil, tx.Error
 	}
 	return entries, nil
+}
+
+func (c CollectionPaintDetails) GetEntry(connection *gorm.DB, collectionId int, googleUserId string) (*CollectionPaintDetails, error) {
+	entry := CollectionPaintDetails{}
+	tx := connection.Joins("JOIN users ON users.id = paint_collections.user_id").
+		Where("paint_collections.id = ? AND users.google_user_id = ?", collectionId, googleUserId).
+		First(&entry)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return nil, ErrRecordNotFound
+		}
+		return nil, tx.Error
+	}
+
+	return &entry, nil
 }
 
 func (c CollectionPaintDetails) DeleteEntry(connection *gorm.DB, id int) error {
