@@ -2,7 +2,7 @@ package brands
 
 import (
 	"context"
-	"errors"
+	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
 
@@ -27,12 +27,14 @@ var GetOperation = huma.Operation{
 func GetHandler(ctx context.Context, input *getBrandInput) (*getBrandOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return nil, errors.New("could not retrieve db from context")
+		slog.Error("Could not retrieve db from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to get brand")
 	}
 
 	brand, err := db.PaintBrands{}.GetBrand(connection, int(input.ID))
 	if err != nil {
-		return nil, err
+		slog.Error("Failed to get brand", "error", err, "id", input.ID)
+		return nil, huma.NewError(http.StatusInternalServerError, "Failed to get brand")
 	}
 
 	return &getBrandOutput{Body: *brand}, nil

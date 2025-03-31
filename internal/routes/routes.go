@@ -3,6 +3,7 @@ package routes
 import (
 	"paint-api/internal/handlers"
 	"paint-api/internal/handlers/brands"
+	"paint-api/internal/handlers/paints"
 
 	"github.com/danielgtaylor/huma/v2"
 )
@@ -15,11 +16,11 @@ func RegisterRoutes(api huma.API) {
 	huma.Register(api, brands.UpdateOperation, brands.UpdateHandler)
 	huma.Register(api, brands.DeleteOperation, brands.DeleteHandler)
 
-	huma.Register(api, handlers.CreatePaintOperation, handlers.CreatePaintHandler)
-	huma.Register(api, handlers.ListPaintsOperation, handlers.ListPaintsHandler)
-	huma.Register(api, handlers.GetPaintsOperation, handlers.GetPaintHandler)
-	huma.Register(api, handlers.UpdatePaintOperation, handlers.UpdatePaintHandler)
-	huma.Register(api, handlers.DeletePaintOperation, handlers.DeletePaintHandler)
+	huma.Register(api, paints.CreateOperation, paints.CreateHandler)
+	huma.Register(api, paints.ListOperation, paints.ListHandler)
+	huma.Register(api, paints.GetOperation, paints.GetHandler)
+	huma.Register(api, paints.UpdateOperation, paints.UpdateHandler)
+	huma.Register(api, paints.DeleteOperation, paints.DeleteHandler)
 
 	huma.Register(api, handlers.RegisterUserOperation, handlers.RegisterUserHandler)
 	huma.Register(api, handlers.LoginOperation, handlers.LoginHandler)

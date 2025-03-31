@@ -3,6 +3,7 @@ package brands
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
 
@@ -36,7 +37,8 @@ func UpdateHandler(ctx context.Context, input *updateBrandInput) (*updateBrandOu
 
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return nil, errors.New("could not retrieve db from context")
+		slog.Error("Could not retrieve db from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to update brand")
 	}
 
 	brand, err := db.PaintBrands{}.UpdateBrand(
@@ -48,7 +50,8 @@ func UpdateHandler(ctx context.Context, input *updateBrandInput) (*updateBrandOu
 		if errors.Is(err, db.ErrRecordNotFound) {
 			return nil, huma.NewError(404, "Brand not found")
 		}
-		return nil, err
+		slog.Error("Failed to update brand", "error", err, "id", input.ID)
+		return nil, huma.NewError(http.StatusInternalServerError, "Failed to update brand")
 	}
 	return &updateBrandOutput{Body: *brand}, nil
 }

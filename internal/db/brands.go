@@ -15,7 +15,7 @@ type PaintBrands struct {
 }
 
 func (b PaintBrands) TableName() string {
-	return "brands"
+	return "paint_brands"
 }
 
 type CreateBrandInput struct {

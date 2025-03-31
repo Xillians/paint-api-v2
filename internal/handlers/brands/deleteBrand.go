@@ -3,6 +3,7 @@ package brands
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
 
@@ -31,7 +32,8 @@ func DeleteHandler(ctx context.Context, input *deleteBrandInput) (*deleteBrandOu
 	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return nil, errors.New("could not retrieve db from context")
+		slog.Error("Could not retrieve db from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to delete brand")
 	}
 
 	err := db.PaintBrands{}.DeleteBrand(connection, int(input.ID))
@@ -39,7 +41,8 @@ func DeleteHandler(ctx context.Context, input *deleteBrandInput) (*deleteBrandOu
 		if errors.Is(err, db.ErrRecordNotFound) {
 			return nil, huma.NewError(404, "Brand not found")
 		}
-		return nil, err
+		slog.Error("Failed to delete brand", "error", err, "id", input.ID)
+		return nil, huma.NewError(http.StatusInternalServerError, "Failed to delete brand")
 	}
 
 	return &deleteBrandOutput{Body: "Brand deleted successfully"}, nil

@@ -2,7 +2,7 @@ package brands
 
 import (
 	"context"
-	"errors"
+	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
 
@@ -30,7 +30,8 @@ var ListOperation = huma.Operation{
 func ListHandler(ctx context.Context, input *listBrandInput) (*listBrandOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return nil, errors.New("could not retrieve db from context")
+		slog.Error("Could not retrieve db from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to list brands")
 	}
 
 	brands, err := db.PaintBrands{}.ListBrands(connection)
