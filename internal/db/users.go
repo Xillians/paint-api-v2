@@ -1,6 +1,8 @@
 package db
 
 import (
+	"log/slog"
+
 	"gorm.io/gorm"
 )
 
@@ -35,16 +37,23 @@ func (u Users) RegisterUser(connection *gorm.DB, input RegisterUserInput) (*User
 		CreatedAt:    "time.Now().String()",
 		UpdatedAt:    "time.Now().String()",
 	}
-	connection.Create(&User)
+	tx := connection.Create(&User)
+	if tx.Error != nil {
+		slog.Error("Failed to create user.", "error", tx.Error)
+		return nil, tx.Error
+	}
 
 	return &User, nil
 }
 
 func (u Users) GetUserByGoogleId(connection *gorm.DB, googleUserId string) (*Users, error) {
 	user := &Users{}
-	result := connection.First(&user, "google_user_id = ?", googleUserId)
-	if result.RowsAffected == 0 {
-		return nil, ErrRecordNotFound
+	tx := connection.First(&user, "google_user_id = ?", googleUserId)
+	if tx.Error != nil {
+		if tx.Error == gorm.ErrRecordNotFound {
+			return nil, ErrRecordNotFound
+		}
+		return nil, tx.Error
 	}
 
 	return user, nil
@@ -57,7 +66,10 @@ func (u Users) DeleteUserByGoogleId(connection *gorm.DB, googleUserId string) er
 		return ErrRecordNotFound
 	}
 
-	connection.Delete(&user)
+	tx := connection.Delete(&user)
+	if tx.Error != nil {
+		return tx.Error
+	}
 
 	return nil
 }
