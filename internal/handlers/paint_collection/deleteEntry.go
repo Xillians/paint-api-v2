@@ -3,6 +3,7 @@ package paint_collection
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
 
@@ -30,18 +31,23 @@ var DeleteCollectionEntryOperation = huma.Operation{
 func DeleteCollectionEntryHandler(ctx context.Context, input *deleteCollectionEntryInput) (*deleteCollectionEntryOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return nil, errors.New("could not retrieve db from context")
+		slog.Error("could not retrieve db from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to delete entry")
 	}
 
 	err := verifyCollectionOwnership(ctx, connection, input.Id)
 	if err != nil {
-		return nil, err
+		slog.Error("could not verify collection ownership", "error", err)
+		return nil, huma.NewError(http.StatusNotFound, "Entry not found")
 	}
 
-	err = connection.Delete(&db.PaintCollection{}, input.Id).Error
+	err = db.CollectionPaintDetails{}.DeleteEntry(connection, input.Id)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, db.ErrRecordNotFound) {
+			return nil, huma.NewError(http.StatusNotFound, "Entry not found")
+		}
+		slog.Error("Error deleting paint", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "Error deleting entry")
 	}
-
-	return &deleteCollectionEntryOutput{Body: "Paint deleted successfully"}, nil
+	return &deleteCollectionEntryOutput{Body: "Entry deleted successfully"}, nil
 }
