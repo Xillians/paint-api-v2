@@ -3,6 +3,7 @@ package paint_collection
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	"net/http"
 
@@ -18,16 +19,15 @@ import (
 func verifyCollectionOwnership(ctx context.Context, connection *gorm.DB, collectionId int) error {
 	userId, ok := ctx.Value("userId").(string)
 	if !ok {
-		return errors.New("could not retrieve user_id from context")
+		return huma.NewError(http.StatusNotFound, "Entry not found")
 	}
 
-	entry := db.PaintCollection{}
-	if err := connection.Joins("JOIN users ON users.id = paint_collections.user_id").
-		Where("paint_collections.id = ? AND users.google_user_id = ?", collectionId, userId).
-		First(&entry).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return huma.NewError(http.StatusNotFound, "entry not found")
+	_, err := db.CollectionPaintDetails{}.GetEntry(connection, collectionId, userId)
+	if err != nil {
+		if errors.Is(err, db.ErrRecordNotFound) {
+			return huma.NewError(http.StatusNotFound, "Entry not found")
 		}
+		slog.Error("Error getting entry", "error", err)
 		return err
 	}
 	return nil
