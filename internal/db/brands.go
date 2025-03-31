@@ -9,7 +9,7 @@ import (
 
 type PaintBrands struct {
 	ID        int    `json:"id" gorm:"primaryKey"`
-	Name      string `json:"name"`
+	Name      string `json:"name" gorm:"not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -39,10 +39,6 @@ func (b PaintBrands) ListBrands(connection *gorm.DB) ([]PaintBrands, error) {
 	var brands []PaintBrands
 	tx := connection.Find(&brands)
 	if tx.Error != nil {
-		if tx.Error == gorm.ErrRecordNotFound {
-			slog.Info("No brands found")
-			return brands, nil
-		}
 		slog.Error("Failed to list brands", "error", tx.Error, "transaction", tx)
 		return nil, tx.Error
 	}
@@ -55,7 +51,7 @@ func (b PaintBrands) GetBrand(connection *gorm.DB, id int) (*PaintBrands, error)
 	if tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
 			slog.Info("Brand not found", "id", id)
-			return nil, nil
+			return nil, ErrRecordNotFound
 		}
 		slog.Error("Failed to get brand", "error", tx.Error, "transaction", tx)
 		return nil, tx.Error
