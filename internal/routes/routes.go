@@ -2,17 +2,18 @@ package routes
 
 import (
 	"paint-api/internal/handlers"
+	"paint-api/internal/handlers/brands"
 
 	"github.com/danielgtaylor/huma/v2"
 )
 
 // RegisterRoutes registers the routes for the API
 func RegisterRoutes(api huma.API) {
-	huma.Register(api, handlers.CreatePaintBrandOperation, handlers.CreatePaintBrandHandler)
-	huma.Register(api, handlers.ListPaintBrandsOperation, handlers.ListPaintBrandsHandler)
-	huma.Register(api, handlers.GetPaintBrandOperation, handlers.GetPaintBrandHandler)
-	huma.Register(api, handlers.UpdatePaintBrandOperation, handlers.UpdatePaintBrandHandler)
-	huma.Register(api, handlers.DeletePaintBrandOperation, handlers.DeletePaintBrandHandler)
+	huma.Register(api, brands.CreateOperation, brands.CreateHandler)
+	huma.Register(api, brands.ListOperation, brands.ListHandler)
+	huma.Register(api, brands.GetOperation, brands.GetHandler)
+	huma.Register(api, brands.UpdateOperation, brands.UpdateHandler)
+	huma.Register(api, brands.DeleteOperation, brands.DeleteHandler)
 
 	huma.Register(api, handlers.CreatePaintOperation, handlers.CreatePaintHandler)
 	huma.Register(api, handlers.ListPaintsOperation, handlers.ListPaintsHandler)

@@ -10,6 +10,9 @@ import (
 	"gorm.io/gorm"
 )
 
+// Add error type: Row not found for local use
+var ErrRecordNotFound = gorm.ErrRecordNotFound
+
 func New(cfg *config.DbConfig) (*gorm.DB, error) {
 	url := fmt.Sprintf("%s?authToken=%s", cfg.DatabseUrl, cfg.AuthToken)
 	slog.Debug("Connecting to database", slog.Any("url", url))
