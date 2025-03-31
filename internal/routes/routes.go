@@ -1,32 +1,35 @@
 package routes
 
 import (
-	"paint-api/internal/handlers"
+	"paint-api/internal/handlers/brands"
+	"paint-api/internal/handlers/paint_collection"
+	"paint-api/internal/handlers/paints"
+	"paint-api/internal/handlers/users"
 
 	"github.com/danielgtaylor/huma/v2"
 )
 
 // RegisterRoutes registers the routes for the API
 func RegisterRoutes(api huma.API) {
-	huma.Register(api, handlers.CreatePaintBrandOperation, handlers.CreatePaintBrandHandler)
-	huma.Register(api, handlers.ListPaintBrandsOperation, handlers.ListPaintBrandsHandler)
-	huma.Register(api, handlers.GetPaintBrandOperation, handlers.GetPaintBrandHandler)
-	huma.Register(api, handlers.UpdatePaintBrandOperation, handlers.UpdatePaintBrandHandler)
-	huma.Register(api, handlers.DeletePaintBrandOperation, handlers.DeletePaintBrandHandler)
+	huma.Register(api, brands.CreateOperation, brands.CreateHandler)
+	huma.Register(api, brands.ListOperation, brands.ListHandler)
+	huma.Register(api, brands.GetOperation, brands.GetHandler)
+	huma.Register(api, brands.UpdateOperation, brands.UpdateHandler)
+	huma.Register(api, brands.DeleteOperation, brands.DeleteHandler)
 
-	huma.Register(api, handlers.CreatePaintOperation, handlers.CreatePaintHandler)
-	huma.Register(api, handlers.ListPaintsOperation, handlers.ListPaintsHandler)
-	huma.Register(api, handlers.GetPaintsOperation, handlers.GetPaintHandler)
-	huma.Register(api, handlers.UpdatePaintOperation, handlers.UpdatePaintHandler)
-	huma.Register(api, handlers.DeletePaintOperation, handlers.DeletePaintHandler)
+	huma.Register(api, paints.CreateOperation, paints.CreateHandler)
+	huma.Register(api, paints.ListOperation, paints.ListHandler)
+	huma.Register(api, paints.GetOperation, paints.GetHandler)
+	huma.Register(api, paints.UpdateOperation, paints.UpdateHandler)
+	huma.Register(api, paints.DeleteOperation, paints.DeleteHandler)
 
-	huma.Register(api, handlers.RegisterUserOperation, handlers.RegisterUserHandler)
-	huma.Register(api, handlers.LoginOperation, handlers.LoginHandler)
-	huma.Register(api, handlers.RefreshTokenOperation, handlers.RefreshTokenHandler)
-	huma.Register(api, handlers.ForgetUserOperation, handlers.ForgetUserHandler)
+	huma.Register(api, users.RegisterOperation, users.RegisterHandler)
+	huma.Register(api, users.LoginOperation, users.LoginHandler)
+	huma.Register(api, users.RefreshTokenOperation, users.RefreshTokenHandler)
+	huma.Register(api, users.ForgetOperation, users.ForgetHandler)
 
-	huma.Register(api, handlers.AddToCollectionOperation, handlers.AddToCollectionHandler)
-	huma.Register(api, handlers.DeleteCollectionEntryOperation, handlers.DeleteCollectionEntryHandler)
-	huma.Register(api, handlers.ListPaintCollectionOperation, handlers.ListPaintCollectionHandler)
-	huma.Register(api, handlers.UpdateCollectionEntryOperation, handlers.UpdateCollectionEntryHandler)
+	huma.Register(api, paint_collection.CreateOperation, paint_collection.CreateHandler)
+	huma.Register(api, paint_collection.DeleteOperation, paint_collection.DeleteHandler)
+	huma.Register(api, paint_collection.ListOperation, paint_collection.ListHandler)
+	huma.Register(api, paint_collection.UpdateOperation, paint_collection.UpdateHandler)
 }
