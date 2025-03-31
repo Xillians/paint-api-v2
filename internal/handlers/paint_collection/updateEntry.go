@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
-	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
@@ -37,40 +36,29 @@ var UpdateCollectionEntryOperation = huma.Operation{
 }
 
 func UpdateCollectionEntryHandler(ctx context.Context, input *updateCollectionEntryInput) (*updateCollectionEntryOutput, error) {
-	out := updateCollectionEntryOutput{
-		Body: db.CollectionPaintDetails{},
-	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return nil, errors.New("could not retrieve db from context")
+		slog.Error("Could not get database connection from context.")
+		return nil, huma.NewError(http.StatusInternalServerError, "Failed to update entry.")
 	}
 
 	err := verifyCollectionOwnership(ctx, connection, input.Id)
 	if err != nil {
-		return nil, err
+		return nil, huma.NewError(http.StatusNotFound, "entry not found")
 	}
 
-	var entry db.PaintCollection
-	err = connection.First(&entry, input.Id).Error
+	entry, err := db.CollectionPaintDetails{}.UpdateEntry(connection, db.UpdateCollectionEntryInput{
+		ID:       input.Id,
+		Quantity: input.Body.Quantity,
+		PaintID:  input.Body.PaintId,
+	})
 	if err != nil {
-		return nil, err
-	}
-
-	entry.Quantity = input.Body.Quantity
-	entry.PaintId = input.Body.PaintId
-	entry.UpdatedAt = time.Now()
-	connection.Save(&entry)
-
-	err = connection.Preload("Paint").
-		Preload("Paint.Brand").
-		First(&out.Body, entry.ID).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, huma.NewError(http.StatusNotFound, "user not found")
+		if errors.Is(err, db.ErrRecordNotFound) {
+			return nil, huma.NewError(http.StatusNotFound, "entry not found")
 		}
-		slog.Error("An error occurred when fetching collection.", "error", err)
-		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch collection")
+		slog.Error("An error occurred when updating collection entry.", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "could not update entry")
 	}
 
-	return &out, nil
+	return &updateCollectionEntryOutput{Body: *entry}, nil
 }
