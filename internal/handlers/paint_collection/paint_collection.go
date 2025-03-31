@@ -1,4 +1,4 @@
-package handlers
+package paint_collection
 
 import (
 	"context"
