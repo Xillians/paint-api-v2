@@ -1,6 +1,10 @@
 package db
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type PaintCollection struct {
 	ID        int       `json:"id" gorm:"primaryKey"`
@@ -22,4 +26,25 @@ type CollectionPaintDetails struct {
 
 func (c CollectionPaintDetails) TableName() string {
 	return "paint_collections"
+}
+
+type createCollectionEntryInput struct {
+}
+type updateCollectionEntryInput struct {
+}
+
+func (c CollectionPaintDetails) CreateEntry(connection gorm.DB, input createCollectionEntryInput) (*CollectionPaintDetails, error) {
+	return nil, nil
+}
+
+func (c CollectionPaintDetails) UpdateEntry(connection gorm.DB, input updateCollectionEntryInput) (*CollectionPaintDetails, error) {
+	return nil, nil
+}
+
+func (c CollectionPaintDetails) ListEntries(connection gorm.DB) ([]CollectionPaintDetails, error) {
+	return nil, nil
+}
+
+func (c CollectionPaintDetails) DeleteEntry(connection gorm.DB, id int) error {
+	return nil
 }
