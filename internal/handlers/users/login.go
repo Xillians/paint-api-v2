@@ -47,15 +47,17 @@ func loginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) 
 	user, err := db.Users{}.GetUserByGoogleId(connection, input.GoogleUserId)
 	if err != nil {
 		if errors.Is(err, db.ErrRecordNotFound) {
+			slog.Error("User not found", "error", err)
 			return nil, huma.NewError(http.StatusNotFound, "User not found")
 		}
 		slog.Error("Error getting user", "error", err)
-		return nil, huma.NewError(http.StatusInternalServerError, "Error getting user")
+		return nil, huma.NewError(http.StatusInternalServerError, "Failed to log in")
 	}
 
 	token, err := jwt.GenerateToken(user.GoogleUserId, user.Role)
 	if err != nil {
-		return nil, err
+		slog.Error("Error generating token", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "Failed to log in")
 	}
 	return &LoginOutput{
 		Body: LoginOutputBody{

@@ -32,7 +32,7 @@ var updateOperation = huma.Operation{
 func updateHandler(ctx context.Context, input *updateBrandInput) (*updateBrandOutput, error) {
 	userRole := ctx.Value("role").(string)
 	if userRole != "administrator" {
-		return nil, huma.NewError(403, "You are not allowed to perform this action")
+		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
 	}
 
 	connection, ok := ctx.Value("db").(*gorm.DB)
@@ -48,7 +48,7 @@ func updateHandler(ctx context.Context, input *updateBrandInput) (*updateBrandOu
 	)
 	if err != nil {
 		if errors.Is(err, db.ErrRecordNotFound) {
-			return nil, huma.NewError(404, "Brand not found")
+			return nil, huma.NewError(http.StatusNotFound, "Brand not found")
 		}
 		slog.Error("Failed to update brand", "error", err, "id", input.ID)
 		return nil, huma.NewError(http.StatusInternalServerError, "Failed to update brand")

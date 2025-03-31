@@ -59,7 +59,8 @@ func refreshTokenHandler(ctx context.Context, input *refreshTokenInput) (*refres
 
 	token, err := jwt.GenerateToken(user.GoogleUserId, user.Role)
 	if err != nil {
-		return nil, err
+		slog.Error("Error generating token", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "Failed to refresh token")
 	}
 	return &refreshTokenOutput{
 		Body: refreshTokenOutputBody{

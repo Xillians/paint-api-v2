@@ -2,7 +2,6 @@ package paints
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
@@ -28,12 +27,13 @@ var createOperation = huma.Operation{
 
 func createHandler(ctx context.Context, input *createPaintInput) (*createPaintOutput, error) {
 	if !validateColorCode(input.Body.ColorCode) {
-		return nil, huma.NewError(400, "Invalid color code")
+		return nil, huma.NewError(http.StatusBadRequest, "Invalid color code")
 	}
 
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return nil, errors.New("could not retrieve db from context")
+		slog.Error("Could not retrieve db from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "Failed to create paint")
 	}
 
 	paint, err := db.Paints{}.CreatePaint(connection, &input.Body)

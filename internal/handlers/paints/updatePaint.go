@@ -36,7 +36,7 @@ func updateHandler(ctx context.Context, input *updatePaintInput) (*updatePaintOu
 
 	userRole := ctx.Value("role").(string)
 	if userRole != "administrator" {
-		return nil, huma.NewError(403, "You are not allowed to perform this action")
+		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
 	}
 
 	connection, ok := ctx.Value("db").(*gorm.DB)

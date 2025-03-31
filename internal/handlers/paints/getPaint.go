@@ -28,7 +28,8 @@ var getOperation = huma.Operation{
 func getHandler(ctx context.Context, input *getPaintsInput) (*getPaintOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return nil, errors.New("could not retrieve db from context")
+		slog.Error("Could not retrieve db from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch paint")
 	}
 
 	paints, err := db.Paints{}.GetPaint(connection, input.Id)

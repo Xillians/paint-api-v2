@@ -36,7 +36,8 @@ func listHandler(ctx context.Context, input *listBrandInput) (*listBrandOutput, 
 
 	brands, err := db.PaintBrands{}.ListBrands(connection)
 	if err != nil {
-		return nil, err
+		slog.Error("Failed to list brands", "error", err)
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to list brands")
 	}
 
 	return &listBrandOutput{Body: listBrandOutputBody{Brands: brands}}, nil

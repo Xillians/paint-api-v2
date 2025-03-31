@@ -2,7 +2,6 @@ package paints
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
@@ -31,7 +30,8 @@ var listOperation = huma.Operation{
 func listHandler(ctx context.Context, input *listPaintInput) (*listPaintOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return nil, errors.New("could not retrieve db from context")
+		slog.Error("Could not retrieve db from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to list paints")
 	}
 
 	paints, err := db.Paints{}.ListPaints(connection)

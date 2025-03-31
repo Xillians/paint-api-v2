@@ -2,7 +2,6 @@ package paints
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
@@ -28,12 +27,13 @@ var deleteOperation = huma.Operation{
 func deleteHandler(ctx context.Context, input *deletePaintInput) (*deletePaintOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
-		return nil, errors.New("could not retrieve db from context")
+		slog.Error("Could not retrieve db from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "Failed to delete paint")
 	}
 
 	userRole := ctx.Value("role").(string)
 	if userRole != "administrator" {
-		return nil, huma.NewError(403, "You are not allowed to perform this action")
+		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
 	}
 
 	error := db.Paints{}.DeletePaint(connection, input.Id)

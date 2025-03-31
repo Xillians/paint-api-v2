@@ -28,7 +28,7 @@ var deleteOperation = huma.Operation{
 func deleteHandler(ctx context.Context, input *deleteBrandInput) (*deleteBrandOutput, error) {
 	userRole := ctx.Value("role").(string)
 	if userRole != "administrator" {
-		return nil, huma.NewError(403, "You are not allowed to perform this action")
+		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
 	}
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
@@ -39,7 +39,7 @@ func deleteHandler(ctx context.Context, input *deleteBrandInput) (*deleteBrandOu
 	err := db.PaintBrands{}.DeleteBrand(connection, int(input.ID))
 	if err != nil {
 		if errors.Is(err, db.ErrRecordNotFound) {
-			return nil, huma.NewError(404, "Brand not found")
+			return nil, huma.NewError(http.StatusNotFound, "Brand not found")
 		}
 		slog.Error("Failed to delete brand", "error", err, "id", input.ID)
 		return nil, huma.NewError(http.StatusInternalServerError, "Failed to delete brand")
