@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"log/slog"
 	"time"
 
 	"gorm.io/gorm"
@@ -56,6 +57,12 @@ func (c CollectionPaintDetails) CreateEntry(connection *gorm.DB, input CreateCol
 		return nil, tx.Error
 	}
 
+	tx = connection.Preload("Paint").Preload("Paint.Brand").First(&entry, entry.ID)
+	if tx.Error != nil {
+		slog.Error("Failed to fetch created entry", "error", tx.Error, "transaction", tx, "entry", entry)
+		return nil, tx.Error
+	}
+
 	return &entry, nil
 }
 
@@ -74,6 +81,12 @@ func (c CollectionPaintDetails) UpdateEntry(connection *gorm.DB, input UpdateCol
 	entry.UpdatedAt = time.Now()
 	tx := connection.Save(&entry)
 	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	tx = connection.Preload("Paint").Preload("Paint.Brand").First(&entry, entry.ID)
+	if tx.Error != nil {
+		slog.Error("Failed to fetch updated entry", "error", tx.Error, "transaction", tx, "entry", entry)
 		return nil, tx.Error
 	}
 
