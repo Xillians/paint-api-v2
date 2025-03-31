@@ -1,0 +1,39 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlite:
+        image: nouchka/sqlite3
+        options: >-
+          --name test-sqlite
+          --mount type=tmpfs,destination=/data
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.20
+
+      - name: Install dependencies 📦
+        run: go mod tidy
+
+      - name: Run tests 🧪
+        run: task test
+
+      - name: Lint code 💅
+        run: task lint
+      
+      - name: Build 🏗️
+        run: task build
