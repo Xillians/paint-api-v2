@@ -10,10 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type addToCollectionInputBody struct {
-	PaintId  int `json:"paint_id" validate:"required"`
-	Quantity int `json:"quantity" validate:"required"`
-}
 type addToCollectionInput struct {
 	Body db.CreateCollectionEntryInput `json:"body"`
 }

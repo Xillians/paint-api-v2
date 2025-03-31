@@ -28,7 +28,6 @@ func NewConfig() *Config {
 		log.Fatal(err)
 	}
 	c.LogLevel = parseLogLevel(os.Getenv("LOG_LEVEL"))
-	slog.Info("Config", "config", c)
 	return &c
 }
 

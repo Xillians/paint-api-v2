@@ -21,10 +21,6 @@ type updateCollectionEntryInput struct {
 	Body updateCollectionEntryInputBody
 }
 
-type updateCollectionEntryOutputBody struct {
-	Entry db.PaintCollection `json:"paint"`
-}
-
 type updateCollectionEntryOutput struct {
 	Body db.CollectionPaintDetails `json:"body"`
 }

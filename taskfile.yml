@@ -20,3 +20,8 @@ tasks:
     desc: "Clean the build artifacts"
     cmds:
       - "rm -rf bin"
+
+  lint:
+    desc: "Run linter"
+    cmds:
+      - "golangci-lint run"

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/http"
 	"paint-api/internal/jwt"
 	"regexp"
 	"strings"
@@ -9,8 +10,6 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 )
-
-const jwtKey key = 1
 
 func UseJwt(jwtService jwt.JWTService) func(huma.Context, func(huma.Context)) {
 	return func(ctx huma.Context, next func(huma.Context)) {
@@ -31,18 +30,18 @@ func AuthenticateRequests(api huma.API, jwtService jwt.JWTService) func(huma.Con
 		jwtToken := strings.Split(authHeader, " ")[1]
 		token, err := jwtService.VerifyToken(jwtToken)
 		if err != nil {
-			huma.WriteErr(api, ctx, 401, "Unauthorized", err)
+			_ = huma.WriteErr(api, ctx, http.StatusUnauthorized, "Unauthorized", err)
 			return
 		}
 
 		userId := token.Claims.(j.MapClaims)["user_id"]
 		if userId == nil {
-			huma.WriteErr(api, ctx, 401, "Unauthorized: User ID not found in token", nil)
+			_ = huma.WriteErr(api, ctx, 401, "Unauthorized: User ID not found in token", nil)
 			return
 		}
 		role := token.Claims.(j.MapClaims)["role"]
 		if role == nil {
-			huma.WriteErr(api, ctx, 401, "Unauthorized: Role not found in token", nil)
+			_ = huma.WriteErr(api, ctx, 401, "Unauthorized: Role not found in token", nil)
 			return
 		}
 
