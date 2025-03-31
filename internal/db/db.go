@@ -29,7 +29,7 @@ func New(cfg *config.DbConfig) (*gorm.DB, error) {
 	db.AutoMigrate(&PaintBrands{})
 	db.AutoMigrate(&PaintCollection{})
 	db.AutoMigrate(&Users{})
-	db.AutoMigrate(&PaintOutputDetails{})
+	db.AutoMigrate(&Paints{})
 
 	return db, nil
 }

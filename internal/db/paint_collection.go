@@ -12,12 +12,12 @@ type PaintCollection struct {
 }
 
 type CollectionPaintDetails struct {
-	ID        int                `json:"id" gorm:"primaryKey"`
-	Quantity  int                `json:"quantity"`
-	PaintID   int                `json:"-" gorm:"not null"`
-	CreatedAt time.Time          `json:"created_at"`
-	UpdatedAt time.Time          `json:"updated_at"`
-	Paint     PaintOutputDetails `json:"paint" gorm:"foreignKey:PaintID"`
+	ID        int       `json:"id" gorm:"primaryKey"`
+	Quantity  int       `json:"quantity"`
+	PaintID   int       `json:"-" gorm:"not null"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Paint     Paints    `json:"paint" gorm:"foreignKey:PaintID"`
 }
 
 func (c CollectionPaintDetails) TableName() string {
