@@ -26,20 +26,10 @@ func (j *JWTService) GenerateToken(userID string, role string) (string, error) {
 }
 
 func (j *JWTService) VerifyToken(tokenString string) (*jwt.Token, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
 		return []byte(j.secretKey), nil
 	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if !token.Valid {
-		return nil, jwt.ErrSignatureInvalid
-	}
-
-	return token, nil
 }
