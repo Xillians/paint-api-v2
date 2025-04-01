@@ -37,4 +37,14 @@ func TestUpdateBrand(t *testing.T) {
 			t.Fatalf("Failed to decode response: %v", err)
 		}
 	})
+	t.Run("Update brand with invalid id", func(t *testing.T) {
+		bearerToken := fmt.Sprintf("Authorization: Bearer %s", body.Token)
+		payload := db.UpdateBrandInput{
+			Name: "Updated Brand",
+		}
+		response := testApi.Put("/paint-brands/100", bearerToken, payload)
+		if response.Result().StatusCode != http.StatusNotFound {
+			t.Fatalf("Expected status code 404, got %d", response.Result().StatusCode)
+		}
+	})
 }
