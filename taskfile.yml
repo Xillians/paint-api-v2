@@ -26,6 +26,12 @@ tasks:
     cmds:
       - "go test --cover ./..."
 
+  test:coverage:html:
+    desc: "Run tests with coverage and generate HTML report"
+    cmds:
+      - "go test --coverprofile=coverage.out ./..."
+      - "go tool cover -html=coverage.out"
+
   clean:
     desc: "Clean the build artifacts"
     cmds:
