@@ -33,4 +33,11 @@ func TestGetBrand(t *testing.T) {
 			t.Fatalf("Failed to decode response: %v", err)
 		}
 	})
+	t.Run("Get brand with invalid id", func(t *testing.T) {
+		bearerToken := fmt.Sprintf("Authorization: Bearer %s", body.Token)
+		response := testApi.Get("/paint-brands/100", bearerToken)
+		if response.Result().StatusCode != http.StatusNotFound {
+			t.Fatalf("Expected status code 404, got %d", response.Result().StatusCode)
+		}
+	})
 }
