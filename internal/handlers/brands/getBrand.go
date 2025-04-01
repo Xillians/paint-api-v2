@@ -2,6 +2,7 @@ package brands
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
@@ -33,6 +34,9 @@ func getHandler(ctx context.Context, input *getBrandInput) (*GetBrandOutput, err
 
 	brand, err := db.PaintBrands{}.GetBrand(connection, int(input.ID))
 	if err != nil {
+		if errors.Is(err, db.ErrRecordNotFound) {
+			return nil, huma.NewError(http.StatusNotFound, "Brand not found")
+		}
 		slog.Error("Failed to get brand", "error", err, "id", input.ID)
 		return nil, huma.NewError(http.StatusInternalServerError, "Failed to get brand")
 	}
