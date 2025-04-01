@@ -100,7 +100,10 @@ func MakeTestData(connection *gorm.DB) (*TestData, error) {
 		Paint: paint,
 		Entry: entry,
 		Cleanup: func() {
-			deleteTestData(connection, user, brand, paint, entry)
+			err := deleteTestData(connection, user, brand, paint, entry)
+			if err != nil {
+				log.Fatalf("Failed to cleanup test data: %v", err)
+			}
 		},
 	}, nil
 }
