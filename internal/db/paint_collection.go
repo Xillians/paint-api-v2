@@ -112,9 +112,9 @@ func (c CollectionPaintDetails) ListEntries(connection *gorm.DB, googleUserId st
 
 func (c CollectionPaintDetails) GetEntry(connection *gorm.DB, collectionId int, googleUserId string) (*CollectionPaintDetails, error) {
 	entry := CollectionPaintDetails{}
-	tx := connection.Joins("JOIN users ON users.id = paint_collections.user_id").
-		Where("paint_collections.id = ? AND users.google_user_id = ?", collectionId, googleUserId).
-		First(&entry)
+	tx := connection.Joins("User").
+		Where("User.google_user_id = ?", googleUserId).
+		First(&entry, collectionId)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return nil, ErrRecordNotFound
