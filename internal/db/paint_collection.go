@@ -97,9 +97,9 @@ func (c CollectionPaintDetails) UpdateEntry(connection *gorm.DB, input UpdateCol
 func (c CollectionPaintDetails) ListEntries(connection *gorm.DB, googleUserId string) ([]CollectionPaintDetails, error) {
 	var entries []CollectionPaintDetails
 	tx := connection.
-		Joins("JOIN users ON users.id = paint_collections.user_id").
+		Joins("User").
 		Preload("Paint.Brand").
-		Where("users.google_user_id = ?", googleUserId).
+		Where("User.google_user_id = ?", googleUserId).
 		Find(&entries)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
