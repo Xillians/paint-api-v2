@@ -10,8 +10,13 @@ import (
 	"gorm.io/gorm"
 )
 
+type addToCollectionInputBody struct {
+	Quantity int `json:"quantity"`
+	PaintID  int `json:"paint_id"`
+}
+
 type addToCollectionInput struct {
-	Body db.CreateCollectionEntryInput `json:"body"`
+	Body addToCollectionInputBody `json:"body"`
 }
 type addToCollectionOutput struct {
 	Body db.CollectionPaintDetails `json:"body"`
