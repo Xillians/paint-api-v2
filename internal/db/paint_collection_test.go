@@ -217,6 +217,55 @@ func TestUpdateEntry(t *testing.T) {
 	})
 }
 
+func TestDeleteEntry(t *testing.T) {
+	t.Run("Delete entry", func(t *testing.T) {
+		entry, err := createTestEntry()
+		if err != nil {
+			t.Errorf("Error creating test entry: %v", err)
+		}
+
+		err = db.CollectionPaintDetails{}.DeleteEntry(testDB, entry.ID)
+		if err != nil {
+			t.Errorf("Error deleting entry by id: %v", err)
+		}
+
+		err = db.Users{}.DeleteUserByGoogleId(testDB, entry.User.GoogleUserId)
+		if err != nil {
+			t.Errorf("Error deleting user by google id: %v", err)
+		}
+		err = db.Paints{}.DeletePaint(testDB, entry.Paint.Id)
+		if err != nil {
+			t.Errorf("Error deleting paint by id: %v", err)
+		}
+		err = db.PaintBrands{}.DeleteBrand(testDB, entry.Paint.Brand.ID)
+		if err != nil {
+			t.Errorf("Error deleting brand by id: %v", err)
+		}
+	})
+	t.Run("Attempt to delete non-existent entry", func(t *testing.T) {
+		err := db.CollectionPaintDetails{}.DeleteEntry(testDB, 100)
+		if err == nil {
+			t.Error("Expected error deleting non-existent entry")
+		}
+		if !errors.Is(err, db.ErrRecordNotFound) {
+			t.Errorf("Wrong error deleting non-existent entry: %v", err)
+		}
+	})
+	t.Run("Transaction error", func(t *testing.T) {
+		connection := OpenTestConnection()
+		sql, err := connection.DB()
+		if err != nil {
+			t.Errorf("Error getting sql connection: %v", err)
+		}
+		sql.Close()
+
+		err = db.CollectionPaintDetails{}.DeleteEntry(connection, 1)
+		if err == nil {
+			t.Error("Expected error deleting entry")
+		}
+	})
+}
+
 func cleanUp(entry *db.CollectionPaintDetails, t *testing.T) {
 
 	err := db.CollectionPaintDetails{}.DeleteEntry(testDB, entry.ID)

@@ -126,5 +126,19 @@ func (c CollectionPaintDetails) GetEntry(connection *gorm.DB, collectionId int, 
 }
 
 func (c CollectionPaintDetails) DeleteEntry(connection *gorm.DB, id int) error {
+	entry := CollectionPaintDetails{}
+	tx := connection.First(&entry, id)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return ErrRecordNotFound
+		}
+		return tx.Error
+	}
+
+	tx = connection.Delete(&entry)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
 	return nil
 }
