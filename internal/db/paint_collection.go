@@ -98,7 +98,7 @@ func (c CollectionPaintDetails) ListEntries(connection *gorm.DB, googleUserId st
 	var entries []CollectionPaintDetails
 	tx := connection.
 		Joins("JOIN users ON users.id = paint_collections.user_id").
-		Preload("Paint").
+		Preload("Paint.Brand").
 		Where("users.google_user_id = ?", googleUserId).
 		Find(&entries)
 	if tx.Error != nil {
