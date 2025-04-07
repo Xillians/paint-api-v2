@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 	"regexp"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -30,7 +31,7 @@ func createHandler(ctx context.Context, input *createPaintInput) (*createPaintOu
 		return nil, huma.NewError(http.StatusBadRequest, "Invalid color code")
 	}
 
-	connection, ok := ctx.Value("db").(*gorm.DB)
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "Failed to create paint")

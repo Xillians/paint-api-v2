@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"paint-api/internal/db"
 	"paint-api/internal/jwt"
+	"paint-api/internal/middleware"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -33,7 +34,7 @@ var loginOperation = huma.Operation{
 }
 
 func loginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) {
-	connection, ok := ctx.Value("db").(*gorm.DB)
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to log in")

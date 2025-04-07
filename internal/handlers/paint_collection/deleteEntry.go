@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
@@ -29,7 +30,7 @@ var deleteOperation = huma.Operation{
 //
 // Deletes a paint from the collection. Requires authentication, and the paint must belong to the user.
 func deleteHandler(ctx context.Context, input *deleteCollectionEntryInput) (*deleteCollectionEntryOutput, error) {
-	connection, ok := ctx.Value("db").(*gorm.DB)
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to delete entry")

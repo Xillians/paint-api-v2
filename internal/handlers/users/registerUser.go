@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 	"regexp"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -27,7 +28,7 @@ var registerOperation = huma.Operation{
 }
 
 func registerHandler(ctx context.Context, input *RegisterUserInput) (*RegisterUserOutput, error) {
-	connection, ok := ctx.Value("db").(*gorm.DB)
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to register user")

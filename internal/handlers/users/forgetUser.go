@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
@@ -25,12 +26,12 @@ var forgetOperation = huma.Operation{
 }
 
 func forgetHandler(ctx context.Context, input *forgetUserInput) (*forgetUserOutput, error) {
-	connection, ok := ctx.Value("db").(*gorm.DB)
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to delete user")
 	}
-	userId, ok := ctx.Value("userId").(string)
+	userId, ok := ctx.Value(middleware.UserIdKey).(string)
 	if !ok {
 		slog.Error("could not retrieve userId from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to delete user")

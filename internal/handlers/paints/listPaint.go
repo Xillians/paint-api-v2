@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
@@ -28,7 +29,7 @@ var listOperation = huma.Operation{
 }
 
 func listHandler(ctx context.Context, input *listPaintInput) (*listPaintOutput, error) {
-	connection, ok := ctx.Value("db").(*gorm.DB)
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to list paints")

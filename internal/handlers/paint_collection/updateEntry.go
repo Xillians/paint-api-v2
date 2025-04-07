@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
@@ -32,7 +33,7 @@ var updateOperation = huma.Operation{
 }
 
 func updateHandler(ctx context.Context, input *updateCollectionEntryInput) (*updateCollectionEntryOutput, error) {
-	connection, ok := ctx.Value("db").(*gorm.DB)
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not get database connection from context.")
 		return nil, huma.NewError(http.StatusInternalServerError, "Failed to update entry.")

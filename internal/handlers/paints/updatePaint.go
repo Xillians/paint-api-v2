@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
@@ -34,12 +35,12 @@ func updateHandler(ctx context.Context, input *updatePaintInput) (*updatePaintOu
 		Body: db.CollectionPaintDetails{},
 	}
 
-	userRole := ctx.Value("role").(string)
+	userRole := ctx.Value(middleware.RoleKey).(string)
 	if userRole != "administrator" {
 		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
 	}
 
-	connection, ok := ctx.Value("db").(*gorm.DB)
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to update paint")

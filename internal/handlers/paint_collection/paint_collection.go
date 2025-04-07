@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
@@ -24,7 +25,7 @@ func RegisterRoutes(api huma.API) {
 //
 // returns an error if the user does not own the entry.
 func verifyCollectionOwnership(ctx context.Context, connection *gorm.DB, collectionId int) error {
-	userId, ok := ctx.Value("userId").(string)
+	userId, ok := ctx.Value(middleware.UserIdKey).(string)
 	if !ok {
 		return huma.NewError(http.StatusNotFound, "Entry not found")
 	}
