@@ -27,7 +27,7 @@ func TestRefreshToken(t *testing.T) {
 	t.Run("Refresh with invalid bearer", func(t *testing.T) {
 		bearer := makeRequestHeader("asd")
 		refreshResponse := testApi.Get("/refresh", bearer)
-		if refreshResponse.Result().StatusCode != 401 {
+		if refreshResponse.Result().StatusCode != http.StatusUnauthorized {
 			t.Fatalf("Expected status code 401, got %d", refreshResponse.Result().StatusCode)
 		}
 	})
@@ -52,7 +52,7 @@ func TestRefreshToken(t *testing.T) {
 
 		bearer := makeRequestHeader(loginResponseBody.Token)
 		refreshResponse := testApi.Get("/refresh", bearer)
-		if refreshResponse.Result().StatusCode != 404 {
+		if refreshResponse.Result().StatusCode != http.StatusNotFound {
 			t.Fatalf("Expected status code 401, got %d", refreshResponse.Result().StatusCode)
 		}
 	})

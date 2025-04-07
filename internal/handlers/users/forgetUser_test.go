@@ -33,7 +33,7 @@ func TestForgetUser(t *testing.T) {
 	t.Run("Delete user with invalid token", func(t *testing.T) {
 		deleteUserHeader := makeRequestHeader("invalid_token")
 		deleteResponse := testApi.Delete(deleteUserEndpoint, deleteUserHeader)
-		if deleteResponse.Result().StatusCode != 401 {
+		if deleteResponse.Result().StatusCode != http.StatusUnauthorized {
 			t.Fatalf("Expected status code 401, got %d", deleteResponse.Result().StatusCode)
 		}
 	})
@@ -60,7 +60,7 @@ func TestForgetUser(t *testing.T) {
 		}
 
 		deleteAttempt2 := testApi.Delete(deleteUserEndpoint, deleteUserHeader)
-		if deleteAttempt2.Result().StatusCode != 404 {
+		if deleteAttempt2.Result().StatusCode != http.StatusNotFound {
 			t.Fatalf("Expected status code 404, got %d", deleteAttempt2.Result().StatusCode)
 		}
 	})

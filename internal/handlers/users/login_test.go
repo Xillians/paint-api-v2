@@ -31,7 +31,7 @@ func TestLogin(t *testing.T) {
 	t.Run("Login with invalid credentials", func(t *testing.T) {
 		loginUrl := fmt.Sprintf("/login/%s", "123")
 		loginResponse := testApi.Get(loginUrl)
-		if loginResponse.Result().StatusCode != 404 {
+		if loginResponse.Result().StatusCode != http.StatusNotFound {
 			t.Fatalf("Expected status code 404, got %d", loginResponse.Result().StatusCode)
 		}
 	})
