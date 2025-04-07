@@ -6,24 +6,17 @@ import (
 	"net/http"
 	"paint-api/internal/db"
 	"paint-api/internal/handlers/brands"
-	"paint-api/internal/handlers/users"
 	"testing"
 )
 
 func TestUpdateBrand(t *testing.T) {
-	loginPath := fmt.Sprintf("/login/%s", testData.User.GoogleUserId)
-	loginResponse := testApi.Get(loginPath)
-	if loginResponse.Result().StatusCode != http.StatusOK {
-		t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
-	}
-	var body users.LoginOutputBody
-	err := json.NewDecoder(loginResponse.Result().Body).Decode(&body)
+	token, err := getUserToken(testData.User.GoogleUserId)
 	if err != nil {
-		t.Fatalf("Failed to decode login response: %v", err)
+		t.Fatalf("Failed to get user token: %v", err)
 	}
 
 	t.Run("Update brand", func(t *testing.T) {
-		bearerToken := fmt.Sprintf("Authorization: Bearer %s", body.Token)
+		bearerToken := fmt.Sprintf("Authorization: Bearer %s", token)
 		payload := db.UpdateBrandInput{
 			Name: "Updated Brand",
 		}
@@ -38,7 +31,7 @@ func TestUpdateBrand(t *testing.T) {
 		}
 	})
 	t.Run("Update brand with invalid id", func(t *testing.T) {
-		bearerToken := fmt.Sprintf("Authorization: Bearer %s", body.Token)
+		bearerToken := fmt.Sprintf("Authorization: Bearer %s", token)
 		payload := db.UpdateBrandInput{
 			Name: "Updated Brand",
 		}
