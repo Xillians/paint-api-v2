@@ -1,7 +1,6 @@
 package users_test
 
 import (
-	"fmt"
 	"net/http"
 	"paint-api/internal/handlers/users"
 	"testing"
@@ -9,9 +8,9 @@ import (
 
 func TestLogin(t *testing.T) {
 	t.Run("Login with valid credentials", func(t *testing.T) {
-		loginResponse, err := loginTestUser("123456")
-		if err != nil {
-			t.Fatalf("Failed to login test user: %v", err)
+		loginResponse := loginTestUser("123456")
+		if loginResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
 		}
 
 		loginResponseBody, err := parseResponse[users.LoginOutputBody](loginResponse)
@@ -24,13 +23,9 @@ func TestLogin(t *testing.T) {
 		if loginResponseBody.ExpiresAt == "" {
 			t.Fatalf("Expected expires_at in response, got empty string")
 		}
-		if loginResponse.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
-		}
 	})
 	t.Run("Login with invalid credentials", func(t *testing.T) {
-		loginUrl := fmt.Sprintf("/login/%s", "123")
-		loginResponse := testApi.Get(loginUrl)
+		loginResponse := loginTestUser("123")
 		if loginResponse.Result().StatusCode != http.StatusNotFound {
 			t.Fatalf("Expected status code 404, got %d", loginResponse.Result().StatusCode)
 		}

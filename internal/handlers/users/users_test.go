@@ -3,7 +3,6 @@ package users_test
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/http/httptest"
 	"os"
 
@@ -45,31 +44,23 @@ func makeRequestHeader(header string) string {
 	return fmt.Sprintf("Authorization: Bearer %s", header)
 }
 
-func createTestUser(userId string, email string) (*httptest.ResponseRecorder, error) {
+func createTestUser(userId string, email string) *httptest.ResponseRecorder {
 	registerUserInput := map[string]interface{}{
 		"email":   email,
 		"user_id": userId,
 	}
 	createResponse := testApi.Post("/register", registerUserInput)
-	if createResponse.Result().StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("expected status code 200, got %d", createResponse.Result().StatusCode)
-	}
-	return createResponse, nil
+	return createResponse
 }
 
-func loginTestUser(userId string) (*httptest.ResponseRecorder, error) {
+func loginTestUser(userId string) *httptest.ResponseRecorder {
 	loginUrl := fmt.Sprintf("/login/%s", userId)
 	loginResponse := testApi.Get(loginUrl)
-	if loginResponse.Result().StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("expected status code 200, got %d", loginResponse.Result().StatusCode)
-	}
-	return loginResponse, nil
+	return loginResponse
 }
-func deleteTestUser(userId string) (*httptest.ResponseRecorder, error) {
+
+func deleteTestUser(userId string) *httptest.ResponseRecorder {
 	bearer := makeRequestHeader(userId)
 	deleteResponse := testApi.Delete("/forget", bearer)
-	if deleteResponse.Result().StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("expected status code 200, got %d", deleteResponse.Result().StatusCode)
-	}
-	return deleteResponse, nil
+	return deleteResponse
 }

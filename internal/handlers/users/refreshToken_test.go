@@ -8,9 +8,9 @@ import (
 
 func TestRefreshToken(t *testing.T) {
 	t.Run("Try to refresh token with valid token", func(t *testing.T) {
-		loginResponse, err := loginTestUser("123456")
-		if err != nil {
-			t.Fatalf("Failed to login test user: %v", err)
+		loginResponse := loginTestUser("123456")
+		if loginResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
 		}
 
 		loginResponseBody, err := parseResponse[users.LoginOutputBody](loginResponse)
@@ -32,22 +32,24 @@ func TestRefreshToken(t *testing.T) {
 		}
 	})
 	t.Run("Refresh with token where user is deleted", func(t *testing.T) {
-		_, err := createTestUser("122", "asd@asd.io")
-		if err != nil {
-			t.Fatalf("Failed to create test user: %v", err)
+		createUserResponse := createTestUser("122", "asd@asd.io")
+		if createUserResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", createUserResponse.Result().StatusCode)
 		}
 
-		loginResponse, err := loginTestUser("122")
-		if err != nil {
-			t.Fatalf("Failed to login test user: %v", err)
+		loginResponse := loginTestUser("122")
+		if loginResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
 		}
+
 		loginResponseBody, err := parseResponse[users.LoginOutputBody](loginResponse)
 		if err != nil {
 			t.Fatalf("Failed to decode login response: %v", err)
 		}
-		_, err = deleteTestUser(loginResponseBody.Token)
-		if err != nil {
-			t.Fatalf("Failed to delete test user: %v", err)
+
+		deleteUserResponse := deleteTestUser(loginResponseBody.Token)
+		if deleteUserResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", deleteUserResponse.Result().StatusCode)
 		}
 
 		bearer := makeRequestHeader(loginResponseBody.Token)

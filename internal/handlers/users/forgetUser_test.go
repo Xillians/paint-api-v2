@@ -9,14 +9,14 @@ import (
 func TestForgetUser(t *testing.T) {
 	deleteUserEndpoint := "/forget"
 	t.Run("Create and delete user", func(t *testing.T) {
-		_, err := createTestUser("123454321", "asd@ghj.io")
-		if err != nil {
-			t.Fatalf("Failed to create test user: %v", err)
+		createResponse := createTestUser("123454321", "asd@ghj.io")
+		if createResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", createResponse.Result().StatusCode)
 		}
 
-		loginResponse, err := loginTestUser("123454321")
-		if err != nil {
-			t.Fatalf("Failed to login test user: %v", err)
+		loginResponse := loginTestUser("123454321")
+		if loginResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
 		}
 
 		loginResponseBody, err := parseResponse[users.LoginOutputBody](loginResponse)
@@ -24,10 +24,9 @@ func TestForgetUser(t *testing.T) {
 			t.Fatalf("Failed to decode login response: %v", err)
 		}
 
-		deleteUserHeader := makeRequestHeader(loginResponseBody.Token)
-		deleteResponse := testApi.Delete(deleteUserEndpoint, deleteUserHeader)
-		if deleteResponse.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", deleteResponse.Result().StatusCode)
+		response := deleteTestUser(loginResponseBody.Token)
+		if response.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", response.Result().StatusCode)
 		}
 	})
 	t.Run("Delete user with invalid token", func(t *testing.T) {
@@ -38,14 +37,14 @@ func TestForgetUser(t *testing.T) {
 		}
 	})
 	t.Run("Attempt to double delete user", func(t *testing.T) {
-		_, err := createTestUser("123454321", "asd@ghj.io")
-		if err != nil {
-			t.Fatalf("Failed to create test user: %v", err)
+		createUserResponse := createTestUser("123454321", "asd@ghj.io")
+		if createUserResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", createUserResponse.Result().StatusCode)
 		}
 
-		loginResponse, err := loginTestUser("123454321")
-		if err != nil {
-			t.Fatalf("Failed to login test user: %v", err)
+		loginResponse := loginTestUser("123454321")
+		if loginResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
 		}
 
 		loginResponseBody, err := parseResponse[users.LoginOutputBody](loginResponse)
@@ -53,15 +52,14 @@ func TestForgetUser(t *testing.T) {
 			t.Fatalf("Failed to decode login response: %v", err)
 		}
 
-		deleteUserHeader := makeRequestHeader(loginResponseBody.Token)
-		deleteResponse := testApi.Delete(deleteUserEndpoint, deleteUserHeader)
-		if deleteResponse.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", deleteResponse.Result().StatusCode)
+		deleteUserResponse := deleteTestUser(loginResponseBody.Token)
+		if deleteUserResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", deleteUserResponse.Result().StatusCode)
 		}
 
-		deleteAttempt2 := testApi.Delete(deleteUserEndpoint, deleteUserHeader)
-		if deleteAttempt2.Result().StatusCode != http.StatusNotFound {
-			t.Fatalf("Expected status code 404, got %d", deleteAttempt2.Result().StatusCode)
+		deleteUserResponse = deleteTestUser(loginResponseBody.Token)
+		if deleteUserResponse.Result().StatusCode != http.StatusNotFound {
+			t.Fatalf("Expected status code 401, got %d", deleteUserResponse.Result().StatusCode)
 		}
 	})
 }
