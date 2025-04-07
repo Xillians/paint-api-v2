@@ -16,7 +16,7 @@ type RegisterUserInput struct {
 	Body db.RegisterUserInput `json:"body"`
 }
 
-type registerUserOutput struct {
+type RegisterUserOutput struct {
 	Body db.Users
 }
 
@@ -26,7 +26,7 @@ var registerOperation = huma.Operation{
 	Tags:   []string{"Users"},
 }
 
-func registerHandler(ctx context.Context, input *RegisterUserInput) (*registerUserOutput, error) {
+func registerHandler(ctx context.Context, input *RegisterUserInput) (*RegisterUserOutput, error) {
 	connection, ok := ctx.Value("db").(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")
@@ -45,7 +45,7 @@ func registerHandler(ctx context.Context, input *RegisterUserInput) (*registerUs
 		return nil, huma.NewError(http.StatusInternalServerError, "Error registering user")
 	}
 
-	return &registerUserOutput{Body: *user}, nil
+	return &RegisterUserOutput{Body: *user}, nil
 }
 
 func validateEmail(email string) bool {
