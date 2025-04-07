@@ -1,6 +1,7 @@
 package users_test
 
 import (
+	"net/http"
 	"paint-api/internal/handlers/users"
 	"testing"
 )
@@ -19,7 +20,7 @@ func TestRefreshToken(t *testing.T) {
 		bearer := makeRequestHeader(loginResponseBody.Token)
 
 		refreshResponse := testApi.Get("/refresh", bearer)
-		if refreshResponse.Result().StatusCode != 200 {
+		if refreshResponse.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", refreshResponse.Result().StatusCode)
 		}
 	})

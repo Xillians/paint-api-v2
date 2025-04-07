@@ -2,6 +2,7 @@ package users_test
 
 import (
 	"fmt"
+	"net/http"
 	"paint-api/internal/handlers/users"
 	"testing"
 )
@@ -23,7 +24,7 @@ func TestLogin(t *testing.T) {
 		if loginResponseBody.ExpiresAt == "" {
 			t.Fatalf("Expected expires_at in response, got empty string")
 		}
-		if loginResponse.Result().StatusCode != 200 {
+		if loginResponse.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
 		}
 	})

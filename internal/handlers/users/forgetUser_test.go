@@ -1,6 +1,7 @@
 package users_test
 
 import (
+	"net/http"
 	"paint-api/internal/handlers/users"
 	"testing"
 )
@@ -25,7 +26,7 @@ func TestForgetUser(t *testing.T) {
 
 		deleteUserHeader := makeRequestHeader(loginResponseBody.Token)
 		deleteResponse := testApi.Delete(deleteUserEndpoint, deleteUserHeader)
-		if deleteResponse.Result().StatusCode != 200 {
+		if deleteResponse.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", deleteResponse.Result().StatusCode)
 		}
 	})
@@ -54,7 +55,7 @@ func TestForgetUser(t *testing.T) {
 
 		deleteUserHeader := makeRequestHeader(loginResponseBody.Token)
 		deleteResponse := testApi.Delete(deleteUserEndpoint, deleteUserHeader)
-		if deleteResponse.Result().StatusCode != 200 {
+		if deleteResponse.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", deleteResponse.Result().StatusCode)
 		}
 
