@@ -11,6 +11,9 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
+const RoleKey contextKey = "role"
+const UserIdKey contextKey = "userId"
+
 func UseJwt(jwtService jwt.JWTService) func(huma.Context, func(huma.Context)) {
 	return func(ctx huma.Context, next func(huma.Context)) {
 		ctx = huma.WithValue(ctx, "jwtKey", jwtService)
@@ -45,8 +48,8 @@ func AuthenticateRequests(api huma.API, jwtService jwt.JWTService) func(huma.Con
 			return
 		}
 
-		ctx = huma.WithValue(ctx, "userId", userId)
-		ctx = huma.WithValue(ctx, "role", role)
+		ctx = huma.WithValue(ctx, UserIdKey, userId)
+		ctx = huma.WithValue(ctx, RoleKey, role)
 
 		next(ctx)
 	}
