@@ -1,30 +1,66 @@
 package brands_test
 
 import (
-	"net/http"
+	"context"
 	"paint-api/internal/db"
+	"paint-api/internal/handlers/brands"
+	"paint-api/internal/middleware"
+	"paint-api/internal/testutils"
 	"testing"
 )
 
-func TestCreateBrand(t *testing.T) {
-	token, err := getUserToken(testData.User.GoogleUserId)
-	if err != nil {
-		t.Fatalf("Failed to get user token: %v", err)
-	}
-
-	t.Run("Create brand", func(t *testing.T) {
-		createBrandResponse := createTestBrand("Test Brand", token)
-		if createBrandResponse.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", createBrandResponse.Result().StatusCode)
+func TestCreateHandler(t *testing.T) {
+	connection, cleanUp := testutils.OpenTestConnection()
+	t.Run("Create brand with valid data", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, middleware.DbKey, connection)
+		input := &brands.CreatebrandInput{
+			Body: db.CreateBrandInput{
+				Name: "Test Brand",
+			},
 		}
-
-		body, err := parseResponse[db.PaintBrands](createBrandResponse)
+		output, err := brands.CreateHandler(ctx, input)
 		if err != nil {
-			t.Fatalf("Failed to parse create brand response: %v", err)
+			t.Errorf("Expected no error, got %v", err)
 		}
-
-		if body.Name != "Test Brand" {
-			t.Fatalf("Expected name to be Test Brand, got %s", body.Name)
+		if output == nil {
+			t.Errorf("Expected output, got nil")
 		}
 	})
+	t.Run("Create with missing db context", func(t *testing.T) {
+		ctx := context.Background()
+		input := &brands.CreatebrandInput{
+			Body: db.CreateBrandInput{
+				Name: "Test Brand",
+			},
+		}
+		output, err := brands.CreateHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if output != nil {
+			t.Errorf("Expected nil output, got %v", output)
+		}
+	})
+	t.Run("db connection error", func(t *testing.T) {
+		ctx, err := createClosedDBContext()
+		if err != nil {
+			t.Fatalf("Failed to create closed DB context: %v", err)
+		}
+
+		input := &brands.CreatebrandInput{
+			Body: db.CreateBrandInput{
+				Name: "Test Brand",
+			},
+		}
+
+		output, err := brands.CreateHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if output != nil {
+			t.Errorf("Expected nil output, got %v", output)
+		}
+	})
+	t.Cleanup(cleanUp)
 }

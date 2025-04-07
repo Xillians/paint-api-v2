@@ -1,40 +1,124 @@
 package brands_test
 
 import (
-	"net/http"
-	"paint-api/internal/db"
+	"context"
+	"paint-api/internal/handlers/brands"
+	"paint-api/internal/middleware"
+	"paint-api/internal/testutils"
 	"testing"
 )
 
-func TestUpdateBrand(t *testing.T) {
-	token, err := getUserToken(testData.User.GoogleUserId)
-	if err != nil {
-		t.Fatalf("Failed to get user token: %v", err)
-	}
+func TestUpdateHandler(t *testing.T) {
+	connection, cleanUp := testutils.OpenTestConnection()
+	t.Run("Update brand with valid data", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, middleware.DbKey, connection)
+		ctx = context.WithValue(ctx, middleware.RoleKey, "administrator")
 
-	t.Run("Update brand", func(t *testing.T) {
-		newBrandName := "Updated Brand"
-		response := updateTestBrand(testData.Brand.ID, newBrandName, token)
-		if response.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", response.Result().StatusCode)
+		input := &brands.UpdateBrandInput{
+			ID: uint(testData.Brand.ID),
+			Body: brands.UpdateBrandInputBody{
+				Name: "Updated Brand",
+			},
 		}
-
-		responseBody, err := parseResponse[db.PaintBrands](response)
+		output, err := brands.UpdateHandler(ctx, input)
 		if err != nil {
-			t.Fatalf("Failed to parse response: %v", err)
+			t.Errorf("Expected no error, got %v", err)
 		}
-		if responseBody.ID != testData.Brand.ID {
-			t.Fatalf("Expected brand ID %d, got %d", testData.Brand.ID, responseBody.ID)
+
+		if output.Body.ID != int(input.ID) {
+			t.Errorf("Expected ID %d, got %d", input.ID, output.Body.ID)
 		}
-		if responseBody.Name != newBrandName {
-			t.Fatalf("Expected brand name %s, got %s", newBrandName, responseBody.Name)
+		if output.Body.Name != input.Body.Name {
+			t.Errorf("Expected name %s, got %s", input.Body.Name, output.Body.Name)
 		}
-	})
-	t.Run("Update brand with invalid id", func(t *testing.T) {
-		newBrandName := "Updated Brand"
-		response := updateTestBrand(100, newBrandName, token)
-		if response.Result().StatusCode != http.StatusNotFound {
-			t.Fatalf("Expected status code 404, got %d", response.Result().StatusCode)
+		if output.Body.UpdatedAt == testData.Brand.UpdatedAt {
+			t.Errorf("Expected updated_at to be different, got %s", output.Body.UpdatedAt)
 		}
 	})
+	t.Run("Update with invalid role", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, middleware.DbKey, connection)
+		ctx = context.WithValue(ctx, middleware.RoleKey, "user")
+		input := &brands.UpdateBrandInput{
+			ID: uint(testData.Brand.ID),
+			Body: brands.UpdateBrandInputBody{
+				Name: "Updated Brand",
+			},
+		}
+		_, err := brands.UpdateHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if err.Error() != "You are not allowed to perform this action" {
+			t.Errorf("Expected forbidden error, got %v", err.Error())
+		}
+	})
+	t.Run("Update with invalid ID", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, middleware.DbKey, connection)
+		ctx = context.WithValue(ctx, middleware.RoleKey, "administrator")
+
+		input := &brands.UpdateBrandInput{
+			ID: uint(999999),
+			Body: brands.UpdateBrandInputBody{
+				Name: "Updated Brand",
+			},
+		}
+		_, err := brands.UpdateHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if err.Error() != "Brand not found" {
+			t.Errorf("Expected not found error, got %v", err.Error())
+		}
+	})
+	t.Run("Update without db connection", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, middleware.RoleKey, "administrator")
+
+		input := &brands.UpdateBrandInput{
+			ID: uint(testData.Brand.ID),
+			Body: brands.UpdateBrandInputBody{
+				Name: "Updated Brand",
+			},
+		}
+
+		_, err := brands.UpdateHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if err.Error() != "failed to update brand" {
+			t.Errorf("Expected database connection error, got %v", err.Error())
+		}
+	})
+	t.Run("Update with closed db connection", func(t *testing.T) {
+		conn, _ := testutils.OpenTestConnection()
+
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, middleware.DbKey, conn)
+		ctx = context.WithValue(ctx, middleware.RoleKey, "administrator")
+
+		db, err := conn.DB()
+		if err != nil {
+			t.Fatalf("Failed to get DB from connection: %v", err)
+		}
+		db.Close()
+
+		input := &brands.UpdateBrandInput{
+			ID: uint(testData.Brand.ID),
+			Body: brands.UpdateBrandInputBody{
+				Name: "Updated Brand",
+			},
+		}
+
+		_, err = brands.UpdateHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if err.Error() != "Failed to update brand" {
+			t.Errorf("Expected database connection error, got %v", err.Error())
+		}
+	})
+	t.Cleanup(cleanUp)
 }

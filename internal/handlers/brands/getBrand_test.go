@@ -1,37 +1,75 @@
 package brands_test
 
 import (
-	"net/http"
-	"paint-api/internal/db"
+	"context"
+	"paint-api/internal/handlers/brands"
+	"paint-api/internal/middleware"
+	"paint-api/internal/testutils"
 	"testing"
 )
 
-func TestGetBrand(t *testing.T) {
-	token, err := getUserToken(testData.User.GoogleUserId)
-	if err != nil {
-		t.Fatalf("Failed to get user token: %v", err)
-	}
+func TestGetbrandHelper(t *testing.T) {
+	connection, cleanUp := testutils.OpenTestConnection()
+	t.Run("Get brand with valid data", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, middleware.DbKey, connection)
+		input := &brands.GetBrandInput{
+			ID: uint(testData.Brand.ID),
+		}
 
-	t.Run("Get brand", func(t *testing.T) {
-		response := getTestBrand(testData.Brand.ID, token)
-		if response.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", response.Result().StatusCode)
-		}
-		responseBody, err := parseResponse[db.PaintBrands](response)
+		output, err := brands.GetHandler(ctx, input)
 		if err != nil {
-			t.Fatalf("Failed to parse response: %v", err)
+			t.Errorf("Expected no error, got %v", err)
 		}
-		if responseBody.ID != 1 {
-			t.Fatalf("Expected brand ID 1, got %d", responseBody.ID)
-		}
-		if responseBody.Name != testData.Brand.Name {
-			t.Fatalf("Expected brand name %s, got %s", testData.Brand.Name, responseBody.Name)
+		if uint(output.Body.ID) != uint(testData.Brand.ID) {
+			t.Errorf("Expected brand ID %d, got %d", testData.Brand.ID, output.Body.ID)
 		}
 	})
-	t.Run("Get brand with invalid id", func(t *testing.T) {
-		response := getTestBrand(100, token)
-		if response.Result().StatusCode != http.StatusNotFound {
-			t.Fatalf("Expected status code 404, got %d", response.Result().StatusCode)
+	t.Run("Get brand with invalid ID", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, middleware.DbKey, connection)
+		input := &brands.GetBrandInput{
+			ID: 99999,
+		}
+
+		output, err := brands.GetHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if output != nil {
+			t.Errorf("Expected nil output, got %v", output)
 		}
 	})
+	t.Run("Get brand with missing db context", func(t *testing.T) {
+		ctx := context.Background()
+		input := &brands.GetBrandInput{
+			ID: uint(testData.Brand.ID),
+		}
+
+		output, err := brands.GetHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if output != nil {
+			t.Errorf("Expected nil output, got %v", output)
+		}
+	})
+	t.Run("Get brand with closed db connection", func(t *testing.T) {
+		ctx, err := createClosedDBContext()
+		if err != nil {
+			t.Fatalf("Failed to create closed DB context: %v", err)
+		}
+		input := &brands.GetBrandInput{
+			ID: uint(testData.Brand.ID),
+		}
+
+		output, err := brands.GetHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if output != nil {
+			t.Errorf("Expected nil output, got %v", output)
+		}
+	})
+	t.Cleanup(cleanUp)
 }

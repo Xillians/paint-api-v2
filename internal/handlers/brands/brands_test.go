@@ -1,7 +1,7 @@
 package brands_test
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,6 +10,7 @@ import (
 
 	"paint-api/internal/db"
 	"paint-api/internal/handlers/users"
+	"paint-api/internal/middleware"
 	"paint-api/internal/testutils"
 	"testing"
 
@@ -34,17 +35,9 @@ func TestMain(m *testing.M) {
 	cleanUp()
 	os.Exit(code)
 }
-func makeRequestHeader(token string) string {
-	return fmt.Sprintf("Authorization: Bearer %s", token)
-}
-func parseResponse[T any](response *httptest.ResponseRecorder) (*T, error) {
-	var body *T
-	err := json.NewDecoder(response.Result().Body).Decode(&body)
-	if err != nil {
-		return nil, err
-	}
-	return body, nil
-}
+
+// Integration test helpers
+
 func createTestBrand(brandName string, token string) *httptest.ResponseRecorder {
 	brandInput := db.CreateBrandInput{
 		Name: brandName,
@@ -89,4 +82,20 @@ func getUserToken(userId string) (string, error) {
 		return "", fmt.Errorf("failed to parse login response: %w", err)
 	}
 	return body.Token, nil
+}
+
+// Unit test helpers
+
+func createClosedDBContext() (context.Context, error) {
+	ctx := context.Background()
+
+	connection, _ := testutils.OpenTestConnection()
+	sql, err := connection.DB()
+	if err != nil {
+		return nil, errors.New("failed to get DB from connection")
+	}
+	sql.Close()
+
+	ctx = context.WithValue(ctx, middleware.DbKey, connection)
+	return ctx, nil
 }
