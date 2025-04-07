@@ -5,12 +5,13 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 )
 
-type listBrandInput struct {
+type ListBrandInput struct {
 }
 
 type ListBrandOutputBody struct {
@@ -27,8 +28,8 @@ var listOperation = huma.Operation{
 	Tags:   []string{"paint-brands"},
 }
 
-func listHandler(ctx context.Context, input *listBrandInput) (*ListBrandOutput, error) {
-	connection, ok := ctx.Value("db").(*gorm.DB)
+func ListHandler(ctx context.Context, input *ListBrandInput) (*ListBrandOutput, error) {
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to list brands")

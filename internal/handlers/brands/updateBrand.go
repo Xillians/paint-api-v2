@@ -6,17 +6,18 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 )
 
-type updateBrandInputBody struct {
+type UpdateBrandInputBody struct {
 	Name string `json:"name"`
 }
-type updateBrandInput struct {
+type UpdateBrandInput struct {
 	ID   uint `path:"id" example:"1" required:"true"`
-	Body updateBrandInputBody
+	Body UpdateBrandInputBody
 }
 
 type UpdateBrandOutput struct {
@@ -29,13 +30,13 @@ var updateOperation = huma.Operation{
 	Tags:   []string{"paint-brands"},
 }
 
-func updateHandler(ctx context.Context, input *updateBrandInput) (*UpdateBrandOutput, error) {
-	userRole := ctx.Value("role").(string)
+func UpdateHandler(ctx context.Context, input *UpdateBrandInput) (*UpdateBrandOutput, error) {
+	userRole := ctx.Value(middleware.RoleKey).(string)
 	if userRole != "administrator" {
 		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
 	}
 
-	connection, ok := ctx.Value("db").(*gorm.DB)
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to update brand")

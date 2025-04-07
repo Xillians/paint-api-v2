@@ -6,12 +6,13 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 )
 
-type getBrandInput struct {
+type GetBrandInput struct {
 	ID uint `path:"id" example:"1" required:"true"`
 }
 
@@ -25,8 +26,8 @@ var getOperation = huma.Operation{
 	Tags:   []string{"paint-brands"},
 }
 
-func getHandler(ctx context.Context, input *getBrandInput) (*GetBrandOutput, error) {
-	connection, ok := ctx.Value("db").(*gorm.DB)
+func GetHandler(ctx context.Context, input *GetBrandInput) (*GetBrandOutput, error) {
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to get brand")

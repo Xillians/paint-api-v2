@@ -6,12 +6,13 @@ import (
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
+	"paint-api/internal/middleware"
 
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 )
 
-type deleteBrandInput struct {
+type DeleteBrandInput struct {
 	ID uint `path:"id" example:"1" required:"true"`
 }
 
@@ -25,12 +26,12 @@ var deleteOperation = huma.Operation{
 	Tags:   []string{"paint-brands"},
 }
 
-func deleteHandler(ctx context.Context, input *deleteBrandInput) (*DeleteBrandOutput, error) {
-	userRole := ctx.Value("role").(string)
+func DeleteHandler(ctx context.Context, input *DeleteBrandInput) (*DeleteBrandOutput, error) {
+	userRole := ctx.Value(middleware.RoleKey).(string)
 	if userRole != "administrator" {
 		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
 	}
-	connection, ok := ctx.Value("db").(*gorm.DB)
+	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to delete brand")
