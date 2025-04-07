@@ -1,11 +1,8 @@
 package brands_test
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"paint-api/internal/db"
-	"paint-api/internal/handlers/brands"
 	"testing"
 )
 
@@ -16,26 +13,26 @@ func TestUpdateBrand(t *testing.T) {
 	}
 
 	t.Run("Update brand", func(t *testing.T) {
-		bearerToken := fmt.Sprintf("Authorization: Bearer %s", token)
-		payload := db.UpdateBrandInput{
-			Name: "Updated Brand",
-		}
-		response := testApi.Put("/paint-brands/1", bearerToken, payload)
+		newBrandName := "Updated Brand"
+		response := updateTestBrand(testData.Brand.ID, newBrandName, token)
 		if response.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", response.Result().StatusCode)
 		}
-		var body brands.UpdateBrandOutput
-		err := json.NewDecoder(response.Result().Body).Decode(&body.Body)
+
+		responseBody, err := parseResponse[db.PaintBrands](response)
 		if err != nil {
-			t.Fatalf("Failed to decode response: %v", err)
+			t.Fatalf("Failed to parse response: %v", err)
+		}
+		if responseBody.ID != testData.Brand.ID {
+			t.Fatalf("Expected brand ID %d, got %d", testData.Brand.ID, responseBody.ID)
+		}
+		if responseBody.Name != newBrandName {
+			t.Fatalf("Expected brand name %s, got %s", newBrandName, responseBody.Name)
 		}
 	})
 	t.Run("Update brand with invalid id", func(t *testing.T) {
-		bearerToken := fmt.Sprintf("Authorization: Bearer %s", token)
-		payload := db.UpdateBrandInput{
-			Name: "Updated Brand",
-		}
-		response := testApi.Put("/paint-brands/100", bearerToken, payload)
+		newBrandName := "Updated Brand"
+		response := updateTestBrand(100, newBrandName, token)
 		if response.Result().StatusCode != http.StatusNotFound {
 			t.Fatalf("Expected status code 404, got %d", response.Result().StatusCode)
 		}

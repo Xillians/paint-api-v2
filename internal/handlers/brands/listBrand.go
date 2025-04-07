@@ -13,12 +13,12 @@ import (
 type listBrandInput struct {
 }
 
-type listBrandOutputBody struct {
+type ListBrandOutputBody struct {
 	Brands []db.PaintBrands `json:"brands"`
 }
 
 type ListBrandOutput struct {
-	Body listBrandOutputBody `json:"body"`
+	Body ListBrandOutputBody `json:"body"`
 }
 
 var listOperation = huma.Operation{
@@ -40,5 +40,5 @@ func listHandler(ctx context.Context, input *listBrandInput) (*ListBrandOutput, 
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to list brands")
 	}
 
-	return &ListBrandOutput{Body: listBrandOutputBody{Brands: brands}}, nil
+	return &ListBrandOutput{Body: ListBrandOutputBody{Brands: brands}}, nil
 }

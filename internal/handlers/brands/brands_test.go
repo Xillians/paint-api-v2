@@ -49,7 +49,6 @@ func createTestBrand(brandName string, token string) *httptest.ResponseRecorder 
 	brandInput := db.CreateBrandInput{
 		Name: brandName,
 	}
-
 	response := testApi.Post("/paint-brands", brandInput, makeRequestHeader(token))
 	return response
 }
@@ -57,16 +56,18 @@ func updateTestBrand(brandID int, brandName string, token string) *httptest.Resp
 	brandInput := db.UpdateBrandInput{
 		Name: brandName,
 	}
-
-	response := testApi.Put(fmt.Sprintf("/paint-brands/%d", brandID), brandInput, makeRequestHeader(token))
+	path := fmt.Sprintf("/paint-brands/%d", brandID)
+	response := testApi.Put(path, brandInput, makeRequestHeader(token))
 	return response
 }
 func deleteTestBrand(brandID int, token string) *httptest.ResponseRecorder {
-	response := testApi.Delete(fmt.Sprintf("/paint-brands/%d", brandID), makeRequestHeader(token))
+	path := fmt.Sprintf("/paint-brands/%d", brandID)
+	response := testApi.Delete(path, makeRequestHeader(token))
 	return response
 }
 func getTestBrand(brandID int, token string) *httptest.ResponseRecorder {
-	response := testApi.Get(fmt.Sprintf("/paint-brands/%d", brandID), makeRequestHeader(token))
+	path := fmt.Sprintf("/paint-brands/%d", brandID)
+	response := testApi.Get(path, makeRequestHeader(token))
 	return response
 }
 func getTestBrands(token string) *httptest.ResponseRecorder {
