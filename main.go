@@ -30,7 +30,11 @@ func main() {
 	apiConfig.Security = []map[string][]string{
 		{"bearer": {}},
 	}
-	c := config.NewConfig()
+	c, err := config.NewConfig()
+	if err != nil {
+		slog.Error("Failed to load config", "error", err)
+		panic(err)
+	}
 
 	logLevel := c.GetLogLevel()
 	opts := &slog.HandlerOptions{
