@@ -15,10 +15,10 @@ import (
 )
 
 func RegisterRoutes(api huma.API) {
-	huma.Register(api, createOperation, createHandler)
-	huma.Register(api, listOperation, listHandler)
-	huma.Register(api, updateOperation, updateHandler)
-	huma.Register(api, deleteOperation, deleteHandler)
+	huma.Register(api, createOperation, CreateHandler)
+	huma.Register(api, listOperation, ListHandler)
+	huma.Register(api, updateOperation, UpdateHandler)
+	huma.Register(api, deleteOperation, DeleteHandler)
 }
 
 // verifyCollectionOwnership checks if the user owns the entry in the collection

@@ -2,7 +2,6 @@ package paint_collection
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
@@ -12,15 +11,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type listPaintCollectionInput struct {
+type ListPaintCollectionInput struct {
 }
 
-type listPaintCollectionOutputBody struct {
+type ListPaintCollectionOutputBody struct {
 	Collection []db.CollectionPaintDetails `json:"collection"`
 }
 
-type listPaintCollectionOutput struct {
-	Body listPaintCollectionOutputBody `json:"body"`
+type ListPaintCollectionOutput struct {
+	Body ListPaintCollectionOutputBody `json:"body"`
 }
 
 var listOperation = huma.Operation{
@@ -29,7 +28,7 @@ var listOperation = huma.Operation{
 	Tags:   []string{"collection"},
 }
 
-func listHandler(ctx context.Context, input *listPaintCollectionInput) (*listPaintCollectionOutput, error) {
+func ListHandler(ctx context.Context, input *ListPaintCollectionInput) (*ListPaintCollectionOutput, error) {
 	userId, ok := ctx.Value(middleware.UserIdKey).(string)
 	if !ok {
 		slog.Error("could not retrieve userId from context")
@@ -43,19 +42,12 @@ func listHandler(ctx context.Context, input *listPaintCollectionInput) (*listPai
 
 	entries, err := db.CollectionPaintDetails{}.ListEntries(connection, userId)
 	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
-			return &listPaintCollectionOutput{
-				Body: listPaintCollectionOutputBody{
-					Collection: []db.CollectionPaintDetails{},
-				},
-			}, nil
-		}
 		slog.Error("failed to list collection entries", "error", err)
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to list collection entries")
 	}
 
-	return &listPaintCollectionOutput{
-		Body: listPaintCollectionOutputBody{
+	return &ListPaintCollectionOutput{
+		Body: ListPaintCollectionOutputBody{
 			Collection: entries,
 		},
 	}, nil
