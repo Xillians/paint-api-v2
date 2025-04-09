@@ -8,8 +8,8 @@ import (
 
 func TestForgetUser(t *testing.T) {
 	deleteUserEndpoint := "/forget"
+	userId := "81549300"
 	t.Run("Create and delete user", func(t *testing.T) {
-		userId := "81549300"
 		createResponse := createTestUser(userId, "asd@ghj.io")
 		if createResponse.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", createResponse.Result().StatusCode)
@@ -38,7 +38,6 @@ func TestForgetUser(t *testing.T) {
 		}
 	})
 	t.Run("Attempt to double delete user", func(t *testing.T) {
-		userId := "81549300"
 		createUserResponse := createTestUser(userId, "asd@ghj.io")
 		if createUserResponse.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", createUserResponse.Result().StatusCode)
