@@ -43,7 +43,7 @@ func RefreshTokenHandler(ctx context.Context, input *RefreshTokenInput) (*refres
 		slog.Error("could not retrieve userId from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to refresh token")
 	}
-	jwt, ok := ctx.Value("jwtKey").(jwt.JWTService)
+	jwt, ok := ctx.Value(middleware.JwtKey).(jwt.JWTService)
 	if !ok {
 		slog.Error("could not retrieve jwt from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to refresh token")

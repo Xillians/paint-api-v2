@@ -39,7 +39,7 @@ func LoginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) 
 		slog.Error("could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to log in")
 	}
-	jwt, ok := ctx.Value("jwtKey").(jwt.JWTService)
+	jwt, ok := ctx.Value(middleware.JwtKey).(jwt.JWTService)
 	if !ok {
 		slog.Error("could not retrieve jwt from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to log in")

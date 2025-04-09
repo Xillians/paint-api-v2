@@ -13,10 +13,11 @@ import (
 
 const RoleKey contextKey = "role"
 const UserIdKey contextKey = "userId"
+const JwtKey contextKey = "jwtKey"
 
 func UseJwt(jwtService jwt.JWTService) func(huma.Context, func(huma.Context)) {
 	return func(ctx huma.Context, next func(huma.Context)) {
-		ctx = huma.WithValue(ctx, "jwtKey", jwtService)
+		ctx = huma.WithValue(ctx, JwtKey, jwtService)
 		next(ctx)
 	}
 }
