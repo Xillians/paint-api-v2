@@ -27,7 +27,7 @@ var createOperation = huma.Operation{
 }
 
 func CreateHandler(ctx context.Context, input *CreatePaintInput) (*createPaintOutput, error) {
-	if !validateColorCode(input.Body.ColorCode) {
+	if !ValidateColorCode(input.Body.ColorCode) {
 		return nil, huma.NewError(http.StatusBadRequest, "Invalid color code")
 	}
 
@@ -45,7 +45,7 @@ func CreateHandler(ctx context.Context, input *CreatePaintInput) (*createPaintOu
 	return &createPaintOutput{Body: *paint}, nil
 }
 
-func validateColorCode(colorCode string) bool {
+func ValidateColorCode(colorCode string) bool {
 	regex := regexp.MustCompile(`^#([A-Fa-f0-9]{6})$`)
 	return regex.MatchString(colorCode)
 }
