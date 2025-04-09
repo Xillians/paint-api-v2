@@ -31,10 +31,50 @@ func TestGetPaintHandler(t *testing.T) {
 		}
 	})
 	t.Run("Try to get non-existing paint", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, middleware.DbKey, connection)
+
+		input := &paints.GetPaintsInput{
+			Id: 99999,
+		}
+		output, err := paints.GetHandler(ctx, input)
+		if err == nil {
+			t.Fatalf("Expected error, got nil")
+		}
+		if output != nil {
+			t.Fatalf("Expected nil output, got %v", output)
+		}
 	})
 	t.Run("Missing DB context", func(t *testing.T) {
+		ctx := context.Background()
+
+		input := &paints.GetPaintsInput{
+			Id: paint.Id,
+		}
+		output, err := paints.GetHandler(ctx, input)
+		if err == nil {
+			t.Fatalf("Expected error, got nil")
+		}
+		if output != nil {
+			t.Fatalf("Expected nil output, got %v", output)
+		}
 	})
 	t.Run("DB connection error", func(t *testing.T) {
+		ctx, err := createClosedDBContext()
+		if err != nil {
+			t.Fatalf("Failed to create closed DB context: %v", err)
+		}
+
+		input := &paints.GetPaintsInput{
+			Id: paint.Id,
+		}
+		output, err := paints.GetHandler(ctx, input)
+		if err == nil {
+			t.Fatalf("Expected error, got nil")
+		}
+		if output != nil {
+			t.Fatalf("Expected nil output, got %v", output)
+		}
 	})
 	t.Cleanup(cleanUp)
 }
