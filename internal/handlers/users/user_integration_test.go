@@ -146,8 +146,9 @@ func TestRefreshToken(t *testing.T) {
 }
 
 func TestRegisterUser(t *testing.T) {
+	userId := "4201"
 	t.Run("Successfully create a user", func(t *testing.T) {
-		response := createTestUser("12345", "asd@asd.io")
+		response := createTestUser(userId, "asd@asd.io")
 		if response.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", response.Result().StatusCode)
 		}
@@ -155,9 +156,25 @@ func TestRegisterUser(t *testing.T) {
 		if response.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", response.Result().StatusCode)
 		}
+
+		loginResponse := loginTestUser(userId)
+		if loginResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
+		}
+
+		loginResponseBody, err := parseResponse[users.LoginOutputBody](loginResponse)
+		if err != nil {
+			t.Fatalf("Failed to decode login response: %v", err)
+		}
+
+		deleteResponse := deleteTestUser(loginResponseBody.Token)
+		if deleteResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", response.Result().StatusCode)
+		}
+
 	})
 	t.Run("Attempt to create duplicate user", func(t *testing.T) {
-		response := createTestUser("1234", "asd@asd.io")
+		response := createTestUser(userId, "asd@asd.io")
 		if response.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", response.Result().StatusCode)
 		}
@@ -166,15 +183,29 @@ func TestRegisterUser(t *testing.T) {
 			t.Fatalf("Expected status code 200, got %d", response.Result().StatusCode)
 		}
 
-		duplicateResponse := createTestUser("1234", "asd@asd.io")
+		duplicateResponse := createTestUser(userId, "asd@asd.io")
 		if duplicateResponse.Result().StatusCode != http.StatusConflict {
 			t.Fatalf("Expected status code 409, got %d", duplicateResponse.Result().StatusCode)
+		}
+
+		loginResponse := loginTestUser(userId)
+		if loginResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
+		}
+		loginResponseBody, err := parseResponse[users.LoginOutputBody](loginResponse)
+		if err != nil {
+			t.Fatalf("Failed to decode login response: %v", err)
+		}
+
+		deleteResponse := deleteTestUser(loginResponseBody.Token)
+		if deleteResponse.Result().StatusCode != http.StatusOK {
+			t.Fatalf("Expected status code 200, got %d", deleteResponse.Result().StatusCode)
 		}
 	})
 	t.Run("Attempt to create user with invalid email", func(t *testing.T) {
 		registerUserInput := map[string]interface{}{
 			"email":   "invalid-email",
-			"user_id": "1234",
+			"user_id": userId,
 		}
 		createResponse := testApi.Post("/register", registerUserInput)
 		if createResponse.Result().StatusCode != http.StatusBadRequest {
