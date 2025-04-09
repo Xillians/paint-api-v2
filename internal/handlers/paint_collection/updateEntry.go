@@ -12,17 +12,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type updateCollectionEntryInputBody struct {
+type UpdateCollectionEntryInputBody struct {
 	Quantity int `json:"quantity"`
 	PaintId  int `json:"paint_id"`
 }
 
-type updateCollectionEntryInput struct {
+type UpdateCollectionEntryInput struct {
 	Id   int `path:"id"`
-	Body updateCollectionEntryInputBody
+	Body UpdateCollectionEntryInputBody
 }
 
-type updateCollectionEntryOutput struct {
+type UpdateCollectionEntryOutput struct {
 	Body db.CollectionPaintDetails `json:"body"`
 }
 
@@ -32,7 +32,7 @@ var updateOperation = huma.Operation{
 	Tags:   []string{"collection"},
 }
 
-func updateHandler(ctx context.Context, input *updateCollectionEntryInput) (*updateCollectionEntryOutput, error) {
+func UpdateHandler(ctx context.Context, input *UpdateCollectionEntryInput) (*UpdateCollectionEntryOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not get database connection from context.")
@@ -57,5 +57,5 @@ func updateHandler(ctx context.Context, input *updateCollectionEntryInput) (*upd
 		return nil, huma.NewError(http.StatusInternalServerError, "could not update entry")
 	}
 
-	return &updateCollectionEntryOutput{Body: *entry}, nil
+	return &UpdateCollectionEntryOutput{Body: *entry}, nil
 }
