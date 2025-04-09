@@ -11,15 +11,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type addToCollectionInputBody struct {
+type AddToCollectionInputBody struct {
 	Quantity int `json:"quantity"`
 	PaintID  int `json:"paint_id"`
 }
 
-type addToCollectionInput struct {
-	Body addToCollectionInputBody `json:"body"`
+type AddToCollectionInput struct {
+	Body AddToCollectionInputBody `json:"body"`
 }
-type addToCollectionOutput struct {
+type AddToCollectionOutput struct {
 	Body db.CollectionPaintDetails `json:"body"`
 }
 
@@ -29,7 +29,7 @@ var createOperation = huma.Operation{
 	Tags:   []string{"collection"},
 }
 
-func createHandler(ctx context.Context, input *addToCollectionInput) (*addToCollectionOutput, error) {
+func CreateHandler(ctx context.Context, input *AddToCollectionInput) (*AddToCollectionOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")
@@ -58,5 +58,5 @@ func createHandler(ctx context.Context, input *addToCollectionInput) (*addToColl
 		return nil, huma.NewError(http.StatusInternalServerError, "could not add paint to collection")
 	}
 
-	return &addToCollectionOutput{Body: *entry}, nil
+	return &AddToCollectionOutput{Body: *entry}, nil
 }

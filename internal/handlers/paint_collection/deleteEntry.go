@@ -2,7 +2,6 @@ package paint_collection
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
@@ -12,11 +11,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type deleteCollectionEntryInput struct {
+type DeleteCollectionEntryInput struct {
 	Id int `path:"id"`
 }
 
-type deleteCollectionEntryOutput struct {
+type DeleteCollectionEntryOutput struct {
 	Body string
 }
 
@@ -26,10 +25,10 @@ var deleteOperation = huma.Operation{
 	Tags:   []string{"collection"},
 }
 
-// deleteHandler deletes a paint from the collection
+// DeleteHandler deletes a paint from the collection
 //
 // Deletes a paint from the collection. Requires authentication, and the paint must belong to the user.
-func deleteHandler(ctx context.Context, input *deleteCollectionEntryInput) (*deleteCollectionEntryOutput, error) {
+func DeleteHandler(ctx context.Context, input *DeleteCollectionEntryInput) (*DeleteCollectionEntryOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")
@@ -44,11 +43,8 @@ func deleteHandler(ctx context.Context, input *deleteCollectionEntryInput) (*del
 
 	err = db.CollectionPaintDetails{}.DeleteEntry(connection, input.Id)
 	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
-			return nil, huma.NewError(http.StatusNotFound, "Entry not found")
-		}
 		slog.Error("Error deleting paint", "error", err)
 		return nil, huma.NewError(http.StatusInternalServerError, "Error deleting entry")
 	}
-	return &deleteCollectionEntryOutput{Body: "Entry deleted successfully"}, nil
+	return &DeleteCollectionEntryOutput{Body: "Entry deleted successfully"}, nil
 }
