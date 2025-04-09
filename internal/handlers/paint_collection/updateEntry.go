@@ -2,7 +2,6 @@ package paint_collection
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
@@ -50,9 +49,6 @@ func UpdateHandler(ctx context.Context, input *UpdateCollectionEntryInput) (*Upd
 		PaintID:  input.Body.PaintId,
 	})
 	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
-			return nil, huma.NewError(http.StatusNotFound, "entry not found")
-		}
 		slog.Error("An error occurred when updating collection entry.", "error", err)
 		return nil, huma.NewError(http.StatusInternalServerError, "could not update entry")
 	}
