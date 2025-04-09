@@ -1,65 +1,83 @@
 package users_test
 
 import (
-	"net/http"
+	"context"
+	"paint-api/internal/db"
 	"paint-api/internal/handlers/users"
+	"paint-api/internal/middleware"
+	"paint-api/internal/testutils"
 	"testing"
 )
 
-func TestForgetUser(t *testing.T) {
-	deleteUserEndpoint := "/forget"
-	t.Run("Create and delete user", func(t *testing.T) {
-		createResponse := createTestUser("123454321", "asd@ghj.io")
-		if createResponse.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", createResponse.Result().StatusCode)
-		}
+func TestRegisterUserHandler(t *testing.T) {
+	connection, cleanUp := testutils.OpenTestConnection()
+	t.Run("Delete a user with valid data", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, middleware.DbKey, connection)
 
-		loginResponse := loginTestUser("123454321")
-		if loginResponse.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
+		registerInput := &users.RegisterUserInput{
+			Body: db.RegisterUserInput{
+				GoogleUserId: "123454321",
+				Email:        "asd@dsa.io",
+			},
 		}
-
-		loginResponseBody, err := parseResponse[users.LoginOutputBody](loginResponse)
+		_, err := users.RegisterHandler(ctx, registerInput)
 		if err != nil {
-			t.Fatalf("Failed to decode login response: %v", err)
+			t.Fatalf("Failed to register user: %v", err)
 		}
 
-		response := deleteTestUser(loginResponseBody.Token)
-		if response.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", response.Result().StatusCode)
-		}
-	})
-	t.Run("Delete user with invalid token", func(t *testing.T) {
-		deleteUserHeader := makeRequestHeader("invalid_token")
-		deleteResponse := testApi.Delete(deleteUserEndpoint, deleteUserHeader)
-		if deleteResponse.Result().StatusCode != http.StatusUnauthorized {
-			t.Fatalf("Expected status code 401, got %d", deleteResponse.Result().StatusCode)
-		}
-	})
-	t.Run("Attempt to double delete user", func(t *testing.T) {
-		createUserResponse := createTestUser("123454321", "asd@ghj.io")
-		if createUserResponse.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", createUserResponse.Result().StatusCode)
-		}
+		ctx = context.WithValue(ctx, middleware.UserIdKey, "123454321")
 
-		loginResponse := loginTestUser("123454321")
-		if loginResponse.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
-		}
-
-		loginResponseBody, err := parseResponse[users.LoginOutputBody](loginResponse)
+		input := &users.ForgetUserInput{}
+		output, err := users.ForgetHandler(ctx, input)
 		if err != nil {
-			t.Fatalf("Failed to decode login response: %v", err)
+			t.Errorf("Expected no error, got %v", err)
 		}
-
-		deleteUserResponse := deleteTestUser(loginResponseBody.Token)
-		if deleteUserResponse.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", deleteUserResponse.Result().StatusCode)
-		}
-
-		deleteUserResponse = deleteTestUser(loginResponseBody.Token)
-		if deleteUserResponse.Result().StatusCode != http.StatusNotFound {
-			t.Fatalf("Expected status code 401, got %d", deleteUserResponse.Result().StatusCode)
+		if output.Body != "User deleted successfully" {
+			t.Errorf("Expected 'User deleted successfully', got %v", output.Body)
 		}
 	})
+	t.Run("Delete with missing userId", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, middleware.DbKey, connection)
+
+		input := &users.ForgetUserInput{}
+		output, err := users.ForgetHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if output != nil {
+			t.Errorf("Expected nil output, got %v", output)
+		}
+	})
+	t.Run("Delete with missing db context", func(t *testing.T) {
+		ctx := context.Background()
+		input := &users.ForgetUserInput{}
+		output, err := users.ForgetHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if output != nil {
+			t.Errorf("Expected nil output, got %v", output)
+		}
+	})
+	t.Run("db connection error", func(t *testing.T) {
+		ctx, err := createClosedDBContext()
+		if err != nil {
+			t.Fatalf("Failed to create closed DB context: %v", err)
+		}
+
+		ctx = context.WithValue(ctx, middleware.UserIdKey, "123454321")
+
+		input := &users.ForgetUserInput{}
+
+		output, err := users.ForgetHandler(ctx, input)
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if output != nil {
+			t.Errorf("Expected nil output, got %v", output)
+		}
+	})
+	t.Cleanup(cleanUp)
 }
