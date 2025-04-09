@@ -1,6 +1,6 @@
 # Paint API v2
-![Build passing](https://github.com/github/docs/actions/workflows/push.yml/badge.svg?branch=main)
-![Coverage](https://img.shields.io/badge/Coverage-78.0%25-brightgreen)
+![builds passing](https://github.com/github/docs/actions/workflows/push.yml/badge.svg?branch=main)
+![Coverage](https://img.shields.io/badge/Coverage-78.1%25-brightgreen)
 
 ## Table of Contents
 
