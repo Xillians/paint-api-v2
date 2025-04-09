@@ -1,5 +1,5 @@
 # Paint API v2
-![Coverage](https://img.shields.io/badge/Coverage-55.3%25-yellow)
+![Coverage](https://img.shields.io/badge/Coverage-65.1%25-yellow)
 
 ## Table of Contents
 
