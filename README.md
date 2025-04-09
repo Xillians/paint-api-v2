@@ -1,5 +1,5 @@
 # Paint API v2
-![builds passing](https://github.com/Xillians/paint-api-v2/blob/main/.github/workflows/push.yml/badge.svg?branch=main)
+![builds passing](https://github.com/Xillians/paint-api-v2/actions/workflows/push.yml/badge.svg?branch=main)
 ![Coverage](https://img.shields.io/badge/Coverage-78.1%25-brightgreen)
 
 ## Table of Contents
