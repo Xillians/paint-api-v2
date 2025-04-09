@@ -95,7 +95,6 @@ func (p Paints) UpdatePaint(connection *gorm.DB, id int, input *UpdatePaintInput
 	}
 
 	paint.Name = input.Name
-	paint.BrandId = input.BrandId
 	paint.ColorCode = input.ColorCode
 	paint.Description = input.Description
 	paint.UpdatedAt = time.Now()
