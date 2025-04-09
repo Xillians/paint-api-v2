@@ -8,8 +8,8 @@ import (
 )
 
 type DbConfig struct {
-	DatabseUrl string `envconfig:"DATABASE_URL" required:"true"`
-	AuthToken  string `envconfig:"AUTH_TOKEN" required:"true"`
+	DatabaseUrl string `envconfig:"DATABASE_URL" required:"true"`
+	AuthToken   string `envconfig:"AUTH_TOKEN" required:"true"`
 }
 
 type Config struct {
@@ -29,7 +29,7 @@ func NewConfig() (*Config, error) {
 	}
 
 	if c.IsTest() {
-		c.DbConfig.DatabseUrl = "file::memory:?cache=shared"
+		c.DbConfig.DatabaseUrl = "file::memory:?cache=shared"
 		c.DbConfig.AuthToken = "test-auth-token"
 		c.JwtSecret = "test-jwt-secret"
 	}

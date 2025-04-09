@@ -24,8 +24,8 @@ func TestNewConfig(t *testing.T) {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		if cfg.DbConfig.DatabseUrl != dbUrl {
-			t.Errorf("Expected %s, got %s", dbUrl, cfg.DbConfig.DatabseUrl)
+		if cfg.DbConfig.DatabaseUrl != dbUrl {
+			t.Errorf("Expected %s, got %s", dbUrl, cfg.DbConfig.DatabaseUrl)
 		}
 		if cfg.DbConfig.AuthToken != authToken {
 			t.Errorf("Expected %s, got %s", authToken, cfg.DbConfig.AuthToken)
@@ -47,8 +47,8 @@ func TestNewConfig(t *testing.T) {
 			t.Fatalf("Expected no error, got %v", err)
 		}
 
-		if cfg.DbConfig.DatabseUrl != "file::memory:?cache=shared" {
-			t.Errorf("Expected %s, got %s", "file::memory:?cache=shared", cfg.DbConfig.DatabseUrl)
+		if cfg.DbConfig.DatabaseUrl != "file::memory:?cache=shared" {
+			t.Errorf("Expected %s, got %s", "file::memory:?cache=shared", cfg.DbConfig.DatabaseUrl)
 		}
 		if cfg.DbConfig.AuthToken != "test-auth-token" {
 			t.Errorf("Expected %s, got %s", "test-auth-token", cfg.DbConfig.AuthToken)
@@ -63,7 +63,7 @@ func TestNewConfig(t *testing.T) {
 		os.Unsetenv("JWT_SECRET")
 		_, err := config.NewConfig()
 		if err == nil {
-			t.Fatalf("Expected no error, got %v", err)
+			t.Fatalf("Expected error, got nil")
 		}
 	})
 	t.Cleanup(func() {

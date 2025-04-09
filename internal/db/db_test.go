@@ -19,12 +19,12 @@ var testDB *gorm.DB
 // Returns a gorm.DB connection
 func OpenTestConnection() *gorm.DB {
 	cfg := &config.DbConfig{
-		DatabseUrl: "file::memory:?cache=shared",
+		DatabaseUrl: "file::memory:?cache=shared",
 	}
 
 	output, err := gorm.Open(sqlite.New(sqlite.Config{
 		DriverName: "libsql",
-		DSN:        cfg.DatabseUrl,
+		DSN:        cfg.DatabaseUrl,
 	}), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to test database: %v", err)
@@ -53,7 +53,7 @@ func TestMain(m *testing.M) {
 func TestInitializeDB(t *testing.T) {
 	t.Run("Failure to connect to database", func(t *testing.T) {
 		cfg := &config.DbConfig{
-			DatabseUrl: "file::memory:?cache=shared",
+			DatabaseUrl: "file::memory:?cache=shared",
 		}
 		_, err := db.New(cfg)
 		if err == nil {
