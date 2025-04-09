@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type listPaintInput struct {
+type ListPaintInput struct {
 }
 
 type listPaintOutputBody struct {
@@ -28,7 +28,7 @@ var listOperation = huma.Operation{
 	Tags:   []string{"paints"},
 }
 
-func ListHandler(ctx context.Context, input *listPaintInput) (*listPaintOutput, error) {
+func ListHandler(ctx context.Context, input *ListPaintInput) (*listPaintOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
