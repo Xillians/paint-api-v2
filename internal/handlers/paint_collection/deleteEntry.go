@@ -2,7 +2,6 @@ package paint_collection
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
@@ -44,9 +43,6 @@ func DeleteHandler(ctx context.Context, input *DeleteCollectionEntryInput) (*Del
 
 	err = db.CollectionPaintDetails{}.DeleteEntry(connection, input.Id)
 	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
-			return nil, huma.NewError(http.StatusNotFound, "Entry not found")
-		}
 		slog.Error("Error deleting paint", "error", err)
 		return nil, huma.NewError(http.StatusInternalServerError, "Error deleting entry")
 	}
