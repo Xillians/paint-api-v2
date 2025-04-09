@@ -169,7 +169,7 @@ func TestRegisterUser(t *testing.T) {
 
 		deleteResponse := deleteTestUser(loginResponseBody.Token)
 		if deleteResponse.Result().StatusCode != http.StatusOK {
-			t.Fatalf("Expected status code 200, got %d", response.Result().StatusCode)
+			t.Fatalf("Expected status code 200, got %d", deleteResponse.Result().StatusCode)
 		}
 
 	})
