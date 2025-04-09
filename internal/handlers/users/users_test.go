@@ -1,11 +1,14 @@
 package users_test
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http/httptest"
 	"os"
 
+	"paint-api/internal/middleware"
 	"paint-api/internal/testutils"
 	"testing"
 
@@ -44,6 +47,8 @@ func makeRequestHeader(header string) string {
 	return fmt.Sprintf("Authorization: Bearer %s", header)
 }
 
+// Integration test helpers
+
 func createTestUser(userId string, email string) *httptest.ResponseRecorder {
 	registerUserInput := map[string]interface{}{
 		"email":   email,
@@ -63,4 +68,20 @@ func deleteTestUser(userId string) *httptest.ResponseRecorder {
 	bearer := makeRequestHeader(userId)
 	deleteResponse := testApi.Delete("/forget", bearer)
 	return deleteResponse
+}
+
+// Unit test helpers
+
+func createClosedDBContext() (context.Context, error) {
+	ctx := context.Background()
+
+	connection, _ := testutils.OpenTestConnection()
+	sql, err := connection.DB()
+	if err != nil {
+		return nil, errors.New("failed to get DB from connection")
+	}
+	sql.Close()
+
+	ctx = context.WithValue(ctx, middleware.DbKey, connection)
+	return ctx, nil
 }
