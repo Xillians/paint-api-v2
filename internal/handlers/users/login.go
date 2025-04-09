@@ -33,7 +33,7 @@ var loginOperation = huma.Operation{
 	Tags:   []string{"Users"},
 }
 
-func loginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) {
+func LoginHandler(ctx context.Context, input *LoginInput) (*LoginOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")

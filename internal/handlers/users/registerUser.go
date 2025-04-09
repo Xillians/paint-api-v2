@@ -27,7 +27,7 @@ var registerOperation = huma.Operation{
 	Tags:   []string{"Users"},
 }
 
-func registerHandler(ctx context.Context, input *RegisterUserInput) (*RegisterUserOutput, error) {
+func RegisterHandler(ctx context.Context, input *RegisterUserInput) (*RegisterUserOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")

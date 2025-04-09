@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type refreshTokenInput struct {
+type RefreshTokenInput struct {
 }
 
 type refreshTokenOutputBody struct {
@@ -32,7 +32,7 @@ var refreshTokenOperation = huma.Operation{
 	Tags:   []string{"Users"},
 }
 
-func refreshTokenHandler(ctx context.Context, input *refreshTokenInput) (*refreshTokenOutput, error) {
+func RefreshTokenHandler(ctx context.Context, input *RefreshTokenInput) (*refreshTokenOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")

@@ -5,8 +5,8 @@ import (
 )
 
 func RegisterRoutes(api huma.API) {
-	huma.Register(api, forgetOperation, forgetHandler)
-	huma.Register(api, refreshTokenOperation, refreshTokenHandler)
-	huma.Register(api, loginOperation, loginHandler)
-	huma.Register(api, registerOperation, registerHandler)
+	huma.Register(api, forgetOperation, ForgetHandler)
+	huma.Register(api, refreshTokenOperation, RefreshTokenHandler)
+	huma.Register(api, loginOperation, LoginHandler)
+	huma.Register(api, registerOperation, RegisterHandler)
 }

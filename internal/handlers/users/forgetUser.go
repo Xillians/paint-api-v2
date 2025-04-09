@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type forgetUserInput struct {
+type ForgetUserInput struct {
 }
 
 type forgetUserOutput struct {
@@ -25,7 +25,7 @@ var forgetOperation = huma.Operation{
 	Tags:   []string{"Users"},
 }
 
-func forgetHandler(ctx context.Context, input *forgetUserInput) (*forgetUserOutput, error) {
+func ForgetHandler(ctx context.Context, input *ForgetUserInput) (*forgetUserOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("could not retrieve db from context")
