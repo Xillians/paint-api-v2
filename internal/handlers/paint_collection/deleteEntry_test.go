@@ -79,6 +79,7 @@ func TestDeleteEntryHandler(t *testing.T) {
 			t.Fatalf("Expected error, got none")
 		}
 		if err.Error() != "Entry not found" {
+			t.Fatalf("Expected error 'Entry not found', got '%v'", err)
 		}
 	})
 	t.Run("DB error", func(t *testing.T) {
