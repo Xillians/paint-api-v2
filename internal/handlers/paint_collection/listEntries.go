@@ -2,7 +2,6 @@ package paint_collection
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
@@ -43,13 +42,6 @@ func ListHandler(ctx context.Context, input *ListPaintCollectionInput) (*ListPai
 
 	entries, err := db.CollectionPaintDetails{}.ListEntries(connection, userId)
 	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
-			return &ListPaintCollectionOutput{
-				Body: ListPaintCollectionOutputBody{
-					Collection: []db.CollectionPaintDetails{},
-				},
-			}, nil
-		}
 		slog.Error("failed to list collection entries", "error", err)
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to list collection entries")
 	}
