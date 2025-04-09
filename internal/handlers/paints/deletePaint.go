@@ -32,7 +32,11 @@ func DeleteHandler(ctx context.Context, input *DeletePaintInput) (*deletePaintOu
 		return nil, huma.NewError(http.StatusInternalServerError, "Failed to delete paint")
 	}
 
-	userRole := ctx.Value(middleware.RoleKey).(string)
+	userRole, ok := ctx.Value(middleware.RoleKey).(string)
+	if !ok {
+		slog.Error("Could not retrieve user role from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "Failed to delete paint")
+	}
 	if userRole != "administrator" {
 		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
 	}
