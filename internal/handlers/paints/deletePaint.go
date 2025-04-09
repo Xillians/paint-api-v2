@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type deletePaintInput struct {
+type DeletePaintInput struct {
 	Id int `path:"id"`
 }
 
@@ -25,7 +25,7 @@ var deleteOperation = huma.Operation{
 	Tags:   []string{"paints"},
 }
 
-func deleteHandler(ctx context.Context, input *deletePaintInput) (*deletePaintOutput, error) {
+func DeleteHandler(ctx context.Context, input *DeletePaintInput) (*deletePaintOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")

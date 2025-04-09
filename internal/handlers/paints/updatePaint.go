@@ -12,12 +12,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type updatePaintInputBody struct {
+type UpdatePaintInputBody struct {
 	Name string `json:"name"`
 }
-type updatePaintInput struct {
+type UpdatePaintInput struct {
 	Id   int `path:"id"`
-	Body updatePaintInputBody
+	Body UpdatePaintInputBody
 }
 
 type updatePaintOutput struct {
@@ -30,7 +30,7 @@ var updateOperation = huma.Operation{
 	Tags:   []string{"paints"},
 }
 
-func updateHandler(ctx context.Context, input *updatePaintInput) (*updatePaintOutput, error) {
+func UpdateHandler(ctx context.Context, input *UpdatePaintInput) (*updatePaintOutput, error) {
 	out := updatePaintOutput{
 		Body: db.CollectionPaintDetails{},
 	}

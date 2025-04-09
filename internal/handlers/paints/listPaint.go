@@ -28,7 +28,7 @@ var listOperation = huma.Operation{
 	Tags:   []string{"paints"},
 }
 
-func listHandler(ctx context.Context, input *listPaintInput) (*listPaintOutput, error) {
+func ListHandler(ctx context.Context, input *listPaintInput) (*listPaintOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
