@@ -62,7 +62,7 @@ func TestListEntriesHandler(t *testing.T) {
 			t.Fatalf("Expected non-empty collection, got empty")
 		}
 	})
-	t.Run("New user only seees their own paints (none)", func(t *testing.T) {
+	t.Run("New user only sees their own paints (none)", func(t *testing.T) {
 		ctx := context.Background()
 		ctx = context.WithValue(ctx, middleware.DbKey, connection)
 
