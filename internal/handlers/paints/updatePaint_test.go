@@ -109,7 +109,7 @@ func TestUpdateHandler(t *testing.T) {
 			t.Errorf("Expected 'failed to update paint' error, got '%v'", err)
 		}
 	})
-	t.Run("Fali with missing db context", func(t *testing.T) {
+	t.Run("Fail with missing db context", func(t *testing.T) {
 		ctx := context.Background()
 		ctx = context.WithValue(ctx, middleware.RoleKey, "administrator")
 		input := &paints.UpdatePaintInput{
