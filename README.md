@@ -62,6 +62,8 @@ The database can can be found on turso.tech and this is the layout:
 
 ![Database layout](./docs/db%20layout.svg)
 
+diagram drawn via this [url](https://dbdiagram.io/d/65e09303cd45b569fb380c37)
+
 ## API documentation
 
 This application uses openAPI which you can either find on the 
