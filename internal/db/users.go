@@ -62,8 +62,12 @@ func (u Users) GetUserByGoogleId(connection *gorm.DB, googleUserId string) (*Use
 func (u Users) DeleteUserByGoogleId(connection *gorm.DB, googleUserId string) error {
 	user := &Users{}
 	result := connection.First(&user, "google_user_id = ?", googleUserId)
-	if result.RowsAffected == 0 {
-		return ErrRecordNotFound
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return ErrRecordNotFound
+		}
+		slog.Error("Failed to find user.", "error", result.Error)
+		return result.Error
 	}
 
 	tx := connection.Delete(&user)
