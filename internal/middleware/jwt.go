@@ -24,8 +24,7 @@ func UseJwt(jwtService jwt.JWTService) func(huma.Context, func(huma.Context)) {
 
 func AuthenticateRequests(api huma.API, jwtService jwt.JWTService) func(huma.Context, func(huma.Context)) {
 	return func(ctx huma.Context, next func(huma.Context)) {
-		loginPathRegex := regexp.MustCompile(`^/login/\d+$`)
-		if loginPathRegex.MatchString(ctx.URL().Path) || ctx.URL().Path == "/register" {
+		if isLoginOrRegisterPath(ctx) {
 			next(ctx)
 			return
 		}
@@ -54,4 +53,10 @@ func AuthenticateRequests(api huma.API, jwtService jwt.JWTService) func(huma.Con
 
 		next(ctx)
 	}
+}
+
+func isLoginOrRegisterPath(ctx huma.Context) bool {
+	path := ctx.URL().Path
+	loginPathRegex := regexp.MustCompile(`^/login/\d+$`)
+	return loginPathRegex.MatchString(path) || path == "/register"
 }
