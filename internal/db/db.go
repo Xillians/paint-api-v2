@@ -16,7 +16,7 @@ var ErrRecordNotFound = gorm.ErrRecordNotFound
 var ErrRecordExists = errors.New("Record already exists")
 
 func New(cfg *config.DbConfig) (*gorm.DB, error) {
-	url := fmt.Sprintf("%s?authToken=%s", cfg.DatabseUrl, cfg.AuthToken)
+	url := fmt.Sprintf("%s?authToken=%s", cfg.DatabaseUrl, cfg.AuthToken)
 	slog.Debug("Connecting to database", slog.Any("url", url))
 
 	db, err := gorm.Open(sqlite.New(sqlite.Config{

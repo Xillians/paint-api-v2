@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"log/slog"
 	"os"
 
@@ -9,8 +8,8 @@ import (
 )
 
 type DbConfig struct {
-	DatabseUrl string `envconfig:"DATABASE_URL" required:"true"`
-	AuthToken  string `envconfig:"AUTH_TOKEN" required:"true"`
+	DatabaseUrl string `envconfig:"DATABASE_URL" required:"true"`
+	AuthToken   string `envconfig:"AUTH_TOKEN" required:"true"`
 }
 
 type Config struct {
@@ -21,24 +20,25 @@ type Config struct {
 	Environment string     `envconfig:"ENVIRONMENT" default:"development"`
 }
 
-func NewConfig() *Config {
+func NewConfig() (*Config, error) {
 	var c Config
 	err := envconfig.Process("", &c)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("Failed to process environment variables", "error", err)
+		return nil, err
 	}
 
 	if c.IsTest() {
-		c.DbConfig.DatabseUrl = "file::memory:?cache=shared"
+		c.DbConfig.DatabaseUrl = "file::memory:?cache=shared"
 		c.DbConfig.AuthToken = "test-auth-token"
 		c.JwtSecret = "test-jwt-secret"
 	}
 
-	c.LogLevel = parseLogLevel(os.Getenv("LOG_LEVEL"))
-	return &c
+	c.LogLevel = ParseLogLevel(os.Getenv("LOG_LEVEL"))
+	return &c, nil
 }
 
-func parseLogLevel(level string) slog.Level {
+func ParseLogLevel(level string) slog.Level {
 	switch level {
 	case "debug":
 		return slog.LevelDebug

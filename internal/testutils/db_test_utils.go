@@ -15,12 +15,12 @@ import (
 // Returns a gorm.DB connection and a cleanup function.
 func OpenTestConnection() (*gorm.DB, func()) {
 	cfg := &config.DbConfig{
-		DatabseUrl: "file::memory:?cache=shared",
+		DatabaseUrl: "file::memory:?cache=shared",
 	}
 
 	output, err := gorm.Open(sqlite.New(sqlite.Config{
 		DriverName: "libsql",
-		DSN:        cfg.DatabseUrl,
+		DSN:        cfg.DatabaseUrl,
 	}), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to test database: %v", err)
