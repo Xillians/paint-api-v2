@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"log/slog"
 	"os"
 
@@ -21,11 +20,12 @@ type Config struct {
 	Environment string     `envconfig:"ENVIRONMENT" default:"development"`
 }
 
-func NewConfig() *Config {
+func NewConfig() (*Config, error) {
 	var c Config
 	err := envconfig.Process("", &c)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("Failed to process environment variables", "error", err)
+		return nil, err
 	}
 
 	if c.IsTest() {
@@ -34,11 +34,11 @@ func NewConfig() *Config {
 		c.JwtSecret = "test-jwt-secret"
 	}
 
-	c.LogLevel = parseLogLevel(os.Getenv("LOG_LEVEL"))
-	return &c
+	c.LogLevel = ParseLogLevel(os.Getenv("LOG_LEVEL"))
+	return &c, nil
 }
 
-func parseLogLevel(level string) slog.Level {
+func ParseLogLevel(level string) slog.Level {
 	switch level {
 	case "debug":
 		return slog.LevelDebug
