@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type getPaintsInput struct {
+type GetPaintsInput struct {
 	Id int `path:"id"`
 }
 
@@ -26,7 +26,7 @@ var getOperation = huma.Operation{
 	Tags:   []string{"paints"},
 }
 
-func getHandler(ctx context.Context, input *getPaintsInput) (*getPaintOutput, error) {
+func GetHandler(ctx context.Context, input *GetPaintsInput) (*getPaintOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")

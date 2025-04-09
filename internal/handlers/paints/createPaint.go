@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type createPaintInput struct {
+type CreatePaintInput struct {
 	Body db.CreatePaintInput
 }
 
@@ -26,7 +26,7 @@ var createOperation = huma.Operation{
 	Tags:   []string{"paints"},
 }
 
-func createHandler(ctx context.Context, input *createPaintInput) (*createPaintOutput, error) {
+func CreateHandler(ctx context.Context, input *CreatePaintInput) (*createPaintOutput, error) {
 	if !validateColorCode(input.Body.ColorCode) {
 		return nil, huma.NewError(http.StatusBadRequest, "Invalid color code")
 	}
