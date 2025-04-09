@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type createPaintInput struct {
+type CreatePaintInput struct {
 	Body db.CreatePaintInput
 }
 
@@ -26,8 +26,8 @@ var createOperation = huma.Operation{
 	Tags:   []string{"paints"},
 }
 
-func createHandler(ctx context.Context, input *createPaintInput) (*createPaintOutput, error) {
-	if !validateColorCode(input.Body.ColorCode) {
+func CreateHandler(ctx context.Context, input *CreatePaintInput) (*createPaintOutput, error) {
+	if !ValidateColorCode(input.Body.ColorCode) {
 		return nil, huma.NewError(http.StatusBadRequest, "Invalid color code")
 	}
 
@@ -45,7 +45,7 @@ func createHandler(ctx context.Context, input *createPaintInput) (*createPaintOu
 	return &createPaintOutput{Body: *paint}, nil
 }
 
-func validateColorCode(colorCode string) bool {
+func ValidateColorCode(colorCode string) bool {
 	regex := regexp.MustCompile(`^#([A-Fa-f0-9]{6})$`)
 	return regex.MatchString(colorCode)
 }

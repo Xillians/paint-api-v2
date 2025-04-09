@@ -2,7 +2,6 @@ package paints
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"paint-api/internal/db"
@@ -12,16 +11,16 @@ import (
 	"gorm.io/gorm"
 )
 
-type updatePaintInputBody struct {
+type UpdatePaintInputBody struct {
 	Name string `json:"name"`
 }
-type updatePaintInput struct {
+type UpdatePaintInput struct {
 	Id   int `path:"id"`
-	Body updatePaintInputBody
+	Body UpdatePaintInputBody
 }
 
 type updatePaintOutput struct {
-	Body db.CollectionPaintDetails
+	Body db.Paints
 }
 
 var updateOperation = huma.Operation{
@@ -30,12 +29,12 @@ var updateOperation = huma.Operation{
 	Tags:   []string{"paints"},
 }
 
-func updateHandler(ctx context.Context, input *updatePaintInput) (*updatePaintOutput, error) {
-	out := updatePaintOutput{
-		Body: db.CollectionPaintDetails{},
+func UpdateHandler(ctx context.Context, input *UpdatePaintInput) (*updatePaintOutput, error) {
+	userRole, ok := ctx.Value(middleware.RoleKey).(string)
+	if !ok {
+		slog.Error("Could not retrieve user role from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to update paint")
 	}
-
-	userRole := ctx.Value(middleware.RoleKey).(string)
 	if userRole != "administrator" {
 		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
 	}
@@ -45,26 +44,19 @@ func updateHandler(ctx context.Context, input *updatePaintInput) (*updatePaintOu
 		slog.Error("Could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "failed to update paint")
 	}
-	var paint db.Paints
-	if err := connection.First(&paint, input.Id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, huma.NewError(http.StatusNotFound, "paint not found")
-		}
-		slog.Error("An error occurred when fetching paint.", "error", err)
-		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch paint")
+
+	dbInput := &db.UpdatePaintInput{
+		Name: input.Body.Name,
 	}
 
-	paint.Name = input.Body.Name
-	connection.Save(&paint)
-
-	err := connection.Preload("Brand").Find(&out.Body).Error
+	paint, err := db.Paints{}.UpdatePaint(connection, input.Id, dbInput)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if err == db.ErrRecordNotFound {
 			return nil, huma.NewError(http.StatusNotFound, "paint not found")
 		}
-		slog.Error("An error occurred when fetching paint.", "error", err)
-		return nil, huma.NewError(http.StatusInternalServerError, "could not fetch paint")
+		slog.Error("Failed to update paint", "error", err, "id", input.Id)
+		return nil, huma.NewError(http.StatusInternalServerError, "failed to update paint")
 	}
 
-	return &out, nil
+	return &updatePaintOutput{Body: *paint}, nil
 }

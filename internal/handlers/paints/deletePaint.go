@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type deletePaintInput struct {
+type DeletePaintInput struct {
 	Id int `path:"id"`
 }
 
@@ -25,14 +25,18 @@ var deleteOperation = huma.Operation{
 	Tags:   []string{"paints"},
 }
 
-func deleteHandler(ctx context.Context, input *deletePaintInput) (*deletePaintOutput, error) {
+func DeleteHandler(ctx context.Context, input *DeletePaintInput) (*deletePaintOutput, error) {
 	connection, ok := ctx.Value(middleware.DbKey).(*gorm.DB)
 	if !ok {
 		slog.Error("Could not retrieve db from context")
 		return nil, huma.NewError(http.StatusInternalServerError, "Failed to delete paint")
 	}
 
-	userRole := ctx.Value(middleware.RoleKey).(string)
+	userRole, ok := ctx.Value(middleware.RoleKey).(string)
+	if !ok {
+		slog.Error("Could not retrieve user role from context")
+		return nil, huma.NewError(http.StatusInternalServerError, "Failed to delete paint")
+	}
 	if userRole != "administrator" {
 		return nil, huma.NewError(http.StatusForbidden, "You are not allowed to perform this action")
 	}

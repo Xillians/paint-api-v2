@@ -12,6 +12,7 @@ import (
 func TestRegisterHandler(t *testing.T) {
 	connection, cleanUp := testutils.OpenTestConnection()
 	userId := testData.User.GoogleUserId
+	createdUserId := "4201"
 
 	t.Run("Register new user", func(t *testing.T) {
 		ctx := context.Background()
@@ -19,7 +20,7 @@ func TestRegisterHandler(t *testing.T) {
 
 		registerInput := &users.RegisterUserInput{
 			Body: db.RegisterUserInput{
-				GoogleUserId: "123454321",
+				GoogleUserId: createdUserId,
 				Email:        "asd@dsa.io",
 			},
 		}
@@ -33,14 +34,25 @@ func TestRegisterHandler(t *testing.T) {
 		if output.Body.UpdatedAt == "" {
 			t.Errorf("Expected non-empty userId, got empty")
 		}
-		if output.Body.GoogleUserId == "" {
-			t.Errorf("Expected non-empty userId, got empty")
+		if output.Body.GoogleUserId != createdUserId {
+			t.Errorf("Expected userId %s, got %s", createdUserId, output.Body.GoogleUserId)
 		}
 		if output.Body.Email == "" {
 			t.Errorf("Expected non-empty email, got empty")
 		}
 		if output.Body.Role != "user" {
 			t.Errorf("Expected role 'user', got %s", output.Body.Role)
+		}
+
+		// delete user
+		deleteInput := &users.ForgetUserInput{}
+		ctx = context.WithValue(ctx, middleware.UserIdKey, createdUserId)
+		deleteOutput, err := users.ForgetHandler(ctx, deleteInput)
+		if err != nil {
+			t.Fatalf("Failed to delete user: %v", err)
+		}
+		if deleteOutput == nil {
+			t.Errorf("Expected non-nil delete output, got nil")
 		}
 	})
 	t.Run("Register existing user", func(t *testing.T) {
@@ -67,7 +79,7 @@ func TestRegisterHandler(t *testing.T) {
 
 		registerInput := &users.RegisterUserInput{
 			Body: db.RegisterUserInput{
-				GoogleUserId: "4202",
+				GoogleUserId: createdUserId,
 				Email:        "invalid-email",
 			},
 		}
@@ -83,7 +95,7 @@ func TestRegisterHandler(t *testing.T) {
 		ctx := context.Background()
 		registerInput := &users.RegisterUserInput{
 			Body: db.RegisterUserInput{
-				GoogleUserId: "4321",
+				GoogleUserId: createdUserId,
 				Email:        "invalid-email",
 			},
 		}
@@ -102,7 +114,7 @@ func TestRegisterHandler(t *testing.T) {
 		}
 		registerInput := &users.RegisterUserInput{
 			Body: db.RegisterUserInput{
-				GoogleUserId: "1211",
+				GoogleUserId: createdUserId,
 				Email:        "invalid-email",
 			},
 		}
