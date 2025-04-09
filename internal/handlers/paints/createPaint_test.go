@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestCreatePaintHanlder(t *testing.T) {
+func TestCreatePaintHandler(t *testing.T) {
 	connection, cleanUp := testutils.OpenTestConnection()
 	brand := testData.Brand
 	t.Run("Successfully create paint", func(t *testing.T) {
