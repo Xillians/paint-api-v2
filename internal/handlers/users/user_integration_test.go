@@ -9,12 +9,13 @@ import (
 func TestForgetUser(t *testing.T) {
 	deleteUserEndpoint := "/forget"
 	t.Run("Create and delete user", func(t *testing.T) {
-		createResponse := createTestUser("123454321", "asd@ghj.io")
+		userId := "81549300"
+		createResponse := createTestUser(userId, "asd@ghj.io")
 		if createResponse.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", createResponse.Result().StatusCode)
 		}
 
-		loginResponse := loginTestUser("123454321")
+		loginResponse := loginTestUser(userId)
 		if loginResponse.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
 		}
@@ -37,12 +38,13 @@ func TestForgetUser(t *testing.T) {
 		}
 	})
 	t.Run("Attempt to double delete user", func(t *testing.T) {
-		createUserResponse := createTestUser("123454321", "asd@ghj.io")
+		userId := "81549300"
+		createUserResponse := createTestUser(userId, "asd@ghj.io")
 		if createUserResponse.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", createUserResponse.Result().StatusCode)
 		}
 
-		loginResponse := loginTestUser("123454321")
+		loginResponse := loginTestUser(userId)
 		if loginResponse.Result().StatusCode != http.StatusOK {
 			t.Fatalf("Expected status code 200, got %d", loginResponse.Result().StatusCode)
 		}

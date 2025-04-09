@@ -17,7 +17,7 @@ func TestRegisterUserHandler(t *testing.T) {
 
 		registerInput := &users.RegisterUserInput{
 			Body: db.RegisterUserInput{
-				GoogleUserId: "123454321",
+				GoogleUserId: "9876789",
 				Email:        "asd@dsa.io",
 			},
 		}
@@ -26,7 +26,7 @@ func TestRegisterUserHandler(t *testing.T) {
 			t.Fatalf("Failed to register user: %v", err)
 		}
 
-		ctx = context.WithValue(ctx, middleware.UserIdKey, "123454321")
+		ctx = context.WithValue(ctx, middleware.UserIdKey, "9876789")
 
 		input := &users.ForgetUserInput{}
 		output, err := users.ForgetHandler(ctx, input)
