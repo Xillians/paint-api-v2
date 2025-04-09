@@ -1,3 +1,4 @@
+# source: https://github.com/marketplace/actions/go-coverage-badge
 name: Generate code coverage badge
 
 on:
