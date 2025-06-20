@@ -4,7 +4,7 @@ go 1.23.3
 
 require (
 	github.com/danielgtaylor/huma/v2 v2.27.0
-	github.com/go-chi/chi/v5 v5.1.0
+	github.com/go-chi/chi/v5 v5.2.2
 )
 
 require (
